@@ -1079,9 +1079,13 @@ function renderAll(days) {
   renderStepsChart(days);
   renderSleep();
 
-  // Aktivitäten-Tabelle: immer echte Daten wenn vorhanden
+  // Aktivitäten-Tabelle: 7T = alle einzeln, 30T+ = Tageszusammenfassung
   if (liveActs && liveActs.length > 0) {
-    renderLiveActivitiesTable(liveActs);
+    if (days <= 7) {
+      renderLiveActivitiesTable(liveActs);
+    } else {
+      renderDailySummaryTable(liveActs);
+    }
   } else {
     renderActivitiesTable(activities.slice(0, 10));
   }
@@ -1089,6 +1093,45 @@ function renderAll(days) {
   renderZones();
   renderStairsChart(days);
   renderAISection(activities);
+}
+
+function renderDailySummaryTable(acts) {
+  const byDate = {};
+  acts.forEach(function(a) {
+    const key = a.date || '?';
+    if (!byDate[key]) byDate[key] = { date: key, totalKcal: 0, totalDist: 0, totalMin: 0, sports: [] };
+    byDate[key].totalKcal += parseInt(a.kcal) || 0;
+    const distVal = parseFloat((a.dist || '0').replace(' km','')) || 0;
+    byDate[key].totalDist += distVal;
+    const durStr = a.dur || '';
+    let mins = 0;
+    const hMatch = durStr.match(/(\d+)h/);
+    const mMatch = durStr.match(/(\d+)\s*m/);
+    if (hMatch) mins += parseInt(hMatch[1]) * 60;
+    if (mMatch) mins += parseInt(mMatch[1]);
+    byDate[key].totalMin += mins;
+    byDate[key].sports.push(a.icon);
+  });
+
+  const rows = Object.values(byDate).map(function(d) {
+    const h = Math.floor(d.totalMin / 60);
+    const m = d.totalMin % 60;
+    const durFormatted = h > 0 ? h + 'h ' + String(m).padStart(2,'0') + 'm' : m + ' min';
+    const distFormatted = d.totalDist > 0 ? d.totalDist.toFixed(1) + ' km' : '–';
+    const uniqueIcons = d.sports.filter(function(v, i, a) { return a.indexOf(v) === i; }).join(' ');
+    return '<div class="activity-row">'
+      + '<div style="font-size:16px;">' + uniqueIcons + '</div>'
+      + '<div><div class="act-name">' + d.date + '</div></div>'
+      + '<div class="act-val">' + durFormatted + '</div>'
+      + '<div class="act-val">' + distFormatted + '</div>'
+      + '<div class="act-val hide-mobile">' + d.totalKcal + ' kcal</div>'
+      + '<div class="act-val hide-mobile">–</div>'
+      + '<div class="act-val hide-mobile">–</div>'
+      + '</div>';
+  }).join('');
+
+  document.getElementById('activity-rows').innerHTML = rows ||
+    '<div style="padding:16px;color:var(--muted);text-align:center;">Keine Aktivitäten gefunden</div>';
 }
 
 function renderLiveActivitiesTable(acts) {
@@ -1193,7 +1236,20 @@ function renderSportChart(activities) {
   }
   const labels = Object.keys(counts);
   const data   = Object.values(counts);
-  const colors = SPORT_TYPES.filter(s => labels.includes(s.name)).map(s => s.color);
+  // Farben für echte Garmin-Sportarten
+  const COLOR_MAP = {
+    'Cardio/Kraft':  '#ff5c5c',
+    'Krafttraining': '#7b61ff',
+    'Liegestütz':    '#f5a623',
+    'Laufband':      '#00e5c8',
+    'Radfahren':     '#4db8ff',
+    'HIIT':          '#ff9040',
+    'Yoga':          '#00e5c8',
+    'Spazieren':     '#9ba3c0',
+    'Wandern':       '#a0c878',
+  };
+  const FALLBACK_COLORS = ['#00e5c8','#7b61ff','#ff5c5c','#f5a623','#4db8ff','#ff9040'];
+  const colors = labels.map((l, i) => COLOR_MAP[l] || FALLBACK_COLORS[i % FALLBACK_COLORS.length]);
   const ctx = document.getElementById('sportChart').getContext('2d');
   charts['sport'] = new Chart(ctx, {
     type: 'doughnut',
