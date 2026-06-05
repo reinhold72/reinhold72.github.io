@@ -1305,14 +1305,25 @@ function renderActivityChart(days) {
 
   if (liveActs && liveActs.length > 0) {
     // Echte Daten: Kalorien pro Tag pro Sportart
-    const COLOR_MAP = {
-      'Cardio/Kraft':  'rgba(255,92,92,.75)',
-      'Krafttraining': 'rgba(123,97,255,.75)',
-      'Liegestütz':    'rgba(245,166,35,.75)',
-      'Laufband':      'rgba(0,229,200,.75)',
-      'Radfahren':     'rgba(77,184,255,.6)',
-      'HIIT':          'rgba(255,144,64,.75)',
-    };
+    // Farben nach Sporttyp — erkennt echte Garmin-Namen automatisch
+    function getActivityColor(name) {
+      const n = (name || '').toLowerCase();
+      if (n.includes('cardio') || n.includes('kraft') || n.includes('gewicht') || n.includes('liegestütz'))
+        return 'rgba(255,92,92,.8)';
+      if (n.includes('lauf') || n.includes('run') || n.includes('jogg') || n.includes('intervall') || n.includes('locker'))
+        return 'rgba(0,229,200,.8)';
+      if (n.includes('rad') || n.includes('bike') || n.includes('cycling'))
+        return 'rgba(77,184,255,.8)';
+      if (n.includes('hiit') || n.includes('tabata'))
+        return 'rgba(255,144,64,.8)';
+      if (n.includes('yoga') || n.includes('dehnen') || n.includes('stretch'))
+        return 'rgba(160,200,120,.8)';
+      if (n.includes('spazier') || n.includes('walk') || n.includes('wander'))
+        return 'rgba(155,163,192,.8)';
+      // Fallback: Farbe aus Index
+      return null;
+    }
+    const FALLBACK_CHART = ['rgba(255,92,92,.8)','rgba(0,229,200,.8)','rgba(123,97,255,.8)','rgba(245,166,35,.8)','rgba(77,184,255,.8)','rgba(255,144,64,.8)'];
 
     // Alle einzigartigen Sportarten
     const sportNames = [...new Set(liveActs.map(a => a.name))];
@@ -1330,7 +1341,7 @@ function renderActivityChart(days) {
       return {
         label: sport,
         data: labels.map(function(d) { return dayMap[d]?.[sport] || 0; }),
-        backgroundColor: COLOR_MAP[sport] || 'rgba(155,163,192,.5)',
+        backgroundColor: getActivityColor(sport) || FALLBACK_CHART[sportNames.indexOf(sport) % FALLBACK_CHART.length],
         borderRadius: 3,
       };
     });
@@ -1398,8 +1409,19 @@ function renderSportChart(activities) {
     'Wandern':        '#a0c878',
   };
   const FALLBACK_COLORS = ['#ff5c5c','#7b61ff','#f5a623','#00e5c8','#4db8ff','#ff9040','#a0c878','#9ba3c0'];
+  function getSportColor(name) {
+    const n = (name || '').toLowerCase();
+    if (n.includes('cardio') || n.includes('kraft') || n.includes('gewicht') || n.includes('liegestütz')) return '#ff5c5c';
+    if (n.includes('lauf') || n.includes('run') || n.includes('jogg') || n.includes('intervall') || n.includes('locker')) return '#00e5c8';
+    if (n.includes('rad') || n.includes('bike') || n.includes('cycling')) return '#4db8ff';
+    if (n.includes('hiit') || n.includes('tabata')) return '#ff9040';
+    if (n.includes('yoga') || n.includes('dehnen')) return '#a0c878';
+    if (n.includes('spazier') || n.includes('walk')) return '#9ba3c0';
+    return null;
+  }
+  const FALLBACK_COLORS = ['#ff5c5c','#7b61ff','#f5a623','#00e5c8','#4db8ff','#ff9040','#a0c878'];
   const colors = labels.map(function(l, i) {
-    return COLOR_MAP[l] || FALLBACK_COLORS[i % FALLBACK_COLORS.length];
+    return getSportColor(l) || FALLBACK_COLORS[i % FALLBACK_COLORS.length];
   });
   const ctx = document.getElementById('sportChart').getContext('2d');
   charts['sport'] = new Chart(ctx, {
