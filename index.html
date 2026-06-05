@@ -1300,30 +1300,72 @@ function destroyChart(id) {
 
 function renderActivityChart(days) {
   destroyChart('activity');
-  const labels = getLabels(Math.min(days, 30));
-  const n = labels.length;
+  const liveActs = window.LIVE_DATA?.activities;
   const ctx = document.getElementById('activityChart').getContext('2d');
-  charts['activity'] = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        { label: 'Kettlebell/Hantel', data: generateDailySeries(n, 0, 8),  backgroundColor: 'rgba(255,92,92,.75)',  borderRadius: 3 },
-        { label: 'Bauchtraining',     data: generateDailySeries(n, 0, 6),  backgroundColor: 'rgba(123,97,255,.75)', borderRadius: 3 },
-        { label: 'Laufband',           data: generateDailySeries(n, 0, 6),  backgroundColor: 'rgba(0,229,200,.7)',   borderRadius: 3 },
-        { label: 'Radfahren (selten)', data: generateDailySeries(n, 0, 4),  backgroundColor: 'rgba(77,184,255,.4)',  borderRadius: 3 },
-      ],
-    },
-    options: {
-      ...CHART_DEFAULTS,
-      plugins: {
-        legend: { display: true, labels: { color: '#9ba3c0', font: { size: 11 }, boxWidth: 10 } },
-        tooltip: { mode: 'index', intersect: false },
+
+  if (liveActs && liveActs.length > 0) {
+    // Echte Daten: Kalorien pro Tag pro Sportart
+    const COLOR_MAP = {
+      'Cardio/Kraft':  'rgba(255,92,92,.75)',
+      'Krafttraining': 'rgba(123,97,255,.75)',
+      'Liegestütz':    'rgba(245,166,35,.75)',
+      'Laufband':      'rgba(0,229,200,.75)',
+      'Radfahren':     'rgba(77,184,255,.6)',
+      'HIIT':          'rgba(255,144,64,.75)',
+    };
+
+    // Alle einzigartigen Sportarten
+    const sportNames = [...new Set(liveActs.map(a => a.name))];
+
+    // Tage aufbauen
+    const dayMap = {};
+    liveActs.forEach(function(a) {
+      const key = a.date || '?';
+      if (!dayMap[key]) dayMap[key] = {};
+      dayMap[key][a.name] = (dayMap[key][a.name] || 0) + (parseInt(a.kcal) || 0);
+    });
+
+    const labels = Object.keys(dayMap).slice(-Math.min(days, 30));
+    const datasets = sportNames.map(function(sport) {
+      return {
+        label: sport,
+        data: labels.map(function(d) { return dayMap[d]?.[sport] || 0; }),
+        backgroundColor: COLOR_MAP[sport] || 'rgba(155,163,192,.5)',
+        borderRadius: 3,
+      };
+    });
+
+    charts['activity'] = new Chart(ctx, {
+      type: 'bar',
+      data: { labels, datasets },
+      options: {
+        ...CHART_DEFAULTS,
+        plugins: {
+          legend: { display: true, labels: { color: '#9ba3c0', font: { size: 11 }, boxWidth: 10 } },
+          tooltip: { mode: 'index', intersect: false },
+        },
+        scales: { ...CHART_DEFAULTS.scales, x: { ...CHART_DEFAULTS.scales.x, stacked: true }, y: { ...CHART_DEFAULTS.scales.y, stacked: true, title: { display: true, text: 'kcal', color: '#5a6280', font: { size: 10 } } } },
+        responsive: true, maintainAspectRatio: false,
       },
-      scales: { ...CHART_DEFAULTS.scales, x: { ...CHART_DEFAULTS.scales.x, stacked: true }, y: { ...CHART_DEFAULTS.scales.y, stacked: true } },
-      responsive: true, maintainAspectRatio: false,
-    },
-  });
+    });
+  } else {
+    // Demo-Fallback
+    const labels = getLabels(Math.min(days, 30));
+    const n = labels.length;
+    charts['activity'] = new Chart(ctx, {
+      type: 'bar',
+      data: { labels, datasets: [
+        { label: 'Cardio/Kraft', data: generateDailySeries(n, 0, 300), backgroundColor: 'rgba(255,92,92,.75)', borderRadius: 3 },
+        { label: 'Laufband',    data: generateDailySeries(n, 0, 250), backgroundColor: 'rgba(0,229,200,.75)', borderRadius: 3 },
+      ]},
+      options: {
+        ...CHART_DEFAULTS,
+        plugins: { legend: { display: true, labels: { color: '#9ba3c0', font: { size: 11 }, boxWidth: 10 } } },
+        scales: { ...CHART_DEFAULTS.scales, x: { ...CHART_DEFAULTS.scales.x, stacked: true }, y: { ...CHART_DEFAULTS.scales.y, stacked: true } },
+        responsive: true, maintainAspectRatio: false,
+      },
+    });
+  }
 }
 
 function renderSportChart(activities) {
@@ -1338,20 +1380,27 @@ function renderSportChart(activities) {
   }
   const labels = Object.keys(counts);
   const data   = Object.values(counts);
-  // Farben für echte Garmin-Sportarten
+  // Farben — auch für echte Garmin-Aktivitätsnamen (Cardio, Liegestütz, etc.)
   const COLOR_MAP = {
-    'Cardio/Kraft':  '#ff5c5c',
-    'Krafttraining': '#7b61ff',
-    'Liegestütz':    '#f5a623',
-    'Laufband':      '#00e5c8',
-    'Radfahren':     '#4db8ff',
-    'HIIT':          '#ff9040',
-    'Yoga':          '#00e5c8',
-    'Spazieren':     '#9ba3c0',
-    'Wandern':       '#a0c878',
+    'Cardio/Kraft':   '#ff5c5c',
+    'Cardio':         '#ff5c5c',
+    'Krafttraining':  '#7b61ff',
+    'Liegestütz':     '#f5a623',
+    'Gewichte':       '#f5a623',
+    'Laufband':       '#00e5c8',
+    'Locker laufen':  '#00e5c8',
+    'Laufbandtraining': '#00e5c8',
+    'Steigerungsintervalle': '#4db8ff',
+    'Radfahren':      '#4db8ff',
+    'HIIT':           '#ff9040',
+    'Yoga':           '#a0c878',
+    'Spazieren':      '#9ba3c0',
+    'Wandern':        '#a0c878',
   };
-  const FALLBACK_COLORS = ['#00e5c8','#7b61ff','#ff5c5c','#f5a623','#4db8ff','#ff9040'];
-  const colors = labels.map((l, i) => COLOR_MAP[l] || FALLBACK_COLORS[i % FALLBACK_COLORS.length]);
+  const FALLBACK_COLORS = ['#ff5c5c','#7b61ff','#f5a623','#00e5c8','#4db8ff','#ff9040','#a0c878','#9ba3c0'];
+  const colors = labels.map(function(l, i) {
+    return COLOR_MAP[l] || FALLBACK_COLORS[i % FALLBACK_COLORS.length];
+  });
   const ctx = document.getElementById('sportChart').getContext('2d');
   charts['sport'] = new Chart(ctx, {
     type: 'doughnut',
