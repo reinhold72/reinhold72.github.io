@@ -471,9 +471,10 @@
 
 <!-- ── LOGIN ── -->
 <div id="login-screen" style="display:none;">
-  <div class="login-box">  <div class="login-box">
+  <div class="login-box">
     <div class="login-logo">⬡ GARMIN ANALYTICS</div>
     <div class="login-sub">Verbinde dein Garmin Connect Konto</div>
+
     <div class="field-label">E-Mail</div>
     <input class="field-input" type="email" id="email" placeholder="deine@email.de">
 
@@ -1002,10 +1003,17 @@ async function showLoading() {
   document.getElementById('loading').classList.remove('hidden');
   for (let s of loadSteps) {
     el.textContent = s;
-    await new Promise(r => setTimeout(r, 200));
+    await new Promise(r => setTimeout(r, 150));
   }
   document.getElementById('loading').classList.add('hidden');
-  await initDashboard();
+  // Dashboard sofort anzeigen mit Demo-Daten
+  initDashboard();
+  // Echte Daten im Hintergrund nachladen
+  loadLiveData().then(() => {
+    if (window.LIVE_DATA) {
+      renderAll(currentRange);
+    }
+  });
 }
 
 // ══════════════════════════════════════════════════
@@ -1016,26 +1024,25 @@ async function initDashboard() {
   document.getElementById('user-name').textContent = userData?.name || 'Athlet';
   const init = (userData?.name || 'G')[0].toUpperCase();
   document.getElementById('user-initials').textContent = init;
-
-  // Echte Daten von GitHub laden
-  await loadLiveData();
   renderAll(currentRange);
 }
 
 async function loadLiveData() {
   try {
     const url = 'https://reinhold72.github.io/daten.json?t=' + Date.now();
-    const resp = await fetch(url);
+    // Timeout nach 5 Sekunden
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    const resp = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeout);
     if (!resp.ok) throw new Error('Keine Daten');
     const d = await resp.json();
     window.LIVE_DATA = d;
     console.log('✅ Echte Garmin-Daten geladen:', d.date);
-
-    // Datum anzeigen
     const dateEl = document.getElementById('live-date');
     if (dateEl) dateEl.textContent = d.date;
   } catch(e) {
-    console.log('Demo-Modus (keine Live-Daten):', e.message);
+    console.log('Demo-Modus:', e.message);
     window.LIVE_DATA = null;
   }
 }
