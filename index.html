@@ -1803,9 +1803,28 @@ function renderWeekPlan() {
   }).join('');
 }
 
-// Auto-start: hide loading after fonts etc loaded
-window.addEventListener('load', () => {
+// Direkt starten ohne Login
+window.addEventListener('load', async () => {
+  document.getElementById('loading').classList.remove('hidden');
+  document.getElementById('login-screen').classList.add('hidden');
+  
+  // Ladeschritte
+  const steps = [
+    'Lade Garmin Daten…',
+    'Verarbeite Aktivitäten…',
+    'Bereite Dashboard vor…',
+  ];
+  const stepEl = document.getElementById('loader-step');
+  for (let s of steps) {
+    stepEl.textContent = s;
+    await new Promise(r => setTimeout(r, 400));
+  }
+  
   document.getElementById('loading').classList.add('hidden');
+  
+  // Direkt Dashboard anzeigen
+  userData = { name: 'Reinhold' };
+  await initDashboard();
 });
 </script>
 </body>
