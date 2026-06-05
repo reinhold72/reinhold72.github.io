@@ -25,13 +25,13 @@
     "rest": "–"
   },
   "weight": {
-    "kg": 75.9,
-    "bmi": 24.8,
+    "kg": 74.9,
+    "bmi": 24.5,
     "fat_pct": 19.0,
-    "muscle_kg": 58.3,
-    "muscle_pct": 76.8,
-    "bone_mass": 3.07,
-    "water_pct": 55.1,
+    "muscle_kg": 57.7,
+    "muscle_pct": 77.0,
+    "bone_mass": 3.03,
+    "water_pct": 54.5,
     "visceral": 3
   },
   "steps": {
