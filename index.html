@@ -1059,17 +1059,53 @@ function setRange(days, el) {
 }
 
 function renderAll(days) {
-  const activities = generateActivities(Math.min(days, 30));
+  // Echte Aktivitäten von GitHub wenn vorhanden, sonst Demo
+  const liveActs = window.LIVE_DATA?.activities;
+  const activities = liveActs && liveActs.length > 0
+    ? liveActs.map(a => ({
+        sport: { name: a.name, icon: a.icon, color: 'var(--accent)', abbr: a.is_run ? 'run' : 'str' },
+        date: new Date(),
+        dist: parseFloat((a.dist || '0').replace(' km','')) || 0,
+        sec: 0, hr: 140, kcal: a.kcal || 0, pace: 0,
+      }))
+    : generateActivities(Math.min(days, 30));
+
   renderKPIs(activities, days);
   renderActivityChart(days);
   renderSportChart(activities);
   renderHRChart(days);
   renderStepsChart(days);
   renderSleep();
-  renderActivitiesTable(activities.slice(0, 10));
+
+  // Aktivitäten-Tabelle: immer echte Daten wenn vorhanden
+  if (liveActs && liveActs.length > 0) {
+    renderLiveActivitiesTable(liveActs);
+  } else {
+    renderActivitiesTable(activities.slice(0, 10));
+  }
+
   renderZones();
   renderStairsChart(days);
   renderAISection(activities);
+}
+
+function renderLiveActivitiesTable(acts) {
+  function fmtDur(dur) { return dur || '–'; }
+  const html = acts.map(a => `
+    <div class="activity-row">
+      <div><div class="act-icon" style="background:rgba(0,229,200,.15);">${a.icon}</div></div>
+      <div>
+        <div class="act-name">${a.name}</div>
+        <div class="act-date">${a.date}</div>
+      </div>
+      <div class="act-val">${a.dist && a.dist !== '–' ? a.dist : '–'}</div>
+      <div class="act-val">${a.dur || '–'}</div>
+      <div class="act-val hide-mobile">${a.is_run && a.pace !== '–' ? a.pace : '–'}</div>
+      <div class="act-val act-hr hide-mobile">–</div>
+      <div class="act-val hide-mobile">${a.kcal || '–'} kcal</div>
+    </div>
+  `).join('');
+  document.getElementById('activity-rows').innerHTML = html || '<div style="padding:16px;color:var(--muted);text-align:center;">Keine Aktivitäten gefunden</div>';
 }
 
 // ══════════════════════════════════════════════════
