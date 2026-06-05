@@ -466,7 +466,7 @@
 <div id="loading">
   <div class="loader-text">GARMIN ANALYTICS</div>
   <div class="loader-bar"><div class="loader-bar-fill"></div></div>
-  <div class="loader-steps" id="loader-step">Verbinde mit Garmin Connect…</div>
+  <div class="loader-steps" id="loader-step">Lade Dashboard…</div>
 </div>
 
 <!-- ── LOGIN ── -->
@@ -993,11 +993,8 @@ function doLogout() {
 //  LOADING SEQUENCE
 // ══════════════════════════════════════════════════
 const loadSteps = [
-  'Verbinde mit Garmin Connect…',
-  'Lade Aktivitätsdaten…',
-  'Lade Herzfrequenz-Daten…',
-  'Lade Schlafdaten…',
-  'Lade Schrittdaten…',
+  'Lade Daten von GitHub…',
+  'Verarbeite Aktivitäten…',
   'Bereite Dashboard vor…',
 ];
 
@@ -1006,11 +1003,10 @@ async function showLoading() {
   document.getElementById('loading').classList.remove('hidden');
   for (let s of loadSteps) {
     el.textContent = s;
-    await new Promise(r => setTimeout(r, 380));
+    await new Promise(r => setTimeout(r, 200));
   }
   document.getElementById('loading').classList.add('hidden');
-  await new Promise(r => setTimeout(r, 300));
-  initDashboard();
+  await initDashboard();
 }
 
 // ══════════════════════════════════════════════════
@@ -1805,26 +1801,9 @@ function renderWeekPlan() {
 
 // Direkt starten ohne Login
 window.addEventListener('load', async () => {
-  document.getElementById('loading').classList.remove('hidden');
   document.getElementById('login-screen').classList.add('hidden');
-  
-  // Ladeschritte
-  const steps = [
-    'Lade Garmin Daten…',
-    'Verarbeite Aktivitäten…',
-    'Bereite Dashboard vor…',
-  ];
-  const stepEl = document.getElementById('loader-step');
-  for (let s of steps) {
-    stepEl.textContent = s;
-    await new Promise(r => setTimeout(r, 400));
-  }
-  
-  document.getElementById('loading').classList.add('hidden');
-  
-  // Direkt Dashboard anzeigen
   userData = { name: 'Reinhold' };
-  await initDashboard();
+  await showLoading();
 });
 </script>
 </body>
