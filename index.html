@@ -470,7 +470,7 @@
 </div>
 
 <!-- ── LOGIN ── -->
-<div id="login-screen">
+<div id="login-screen" style="display:none;">
   <div class="login-box">
     <div class="login-logo">⬡ GARMIN ANALYTICS</div>
     <div class="login-sub">Verbinde dein Garmin Connect Konto</div>
@@ -1801,7 +1801,6 @@ function renderWeekPlan() {
 
 // Direkt starten ohne Login
 window.addEventListener('load', async () => {
-  document.getElementById('login-screen').classList.add('hidden');
   userData = { name: 'Reinhold' };
   await showLoading();
 });
