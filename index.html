@@ -880,16 +880,17 @@ function randInt(min, max) { return Math.floor(rand(min, max)); }
 
 // Cardio-Einheiten in Garmin = tatsächlich Kraft/Funktional (Bauch, Kettlebell, Hantel)
 // Cardio = Kraft; Laufen = Laufband; Radfahren selten
+// Echte Sportarten aus Garmin
 const SPORT_TYPES = [
-  { name: 'Kettlebell',    icon: '🔔', color: 'var(--strength)', abbr:'str'  },
-  { name: 'Bauchtraining', icon: '💪', color: 'var(--accent4)',  abbr:'str'  },
-  { name: 'Hanteltraining',icon: '🏋️', color: 'var(--run)',      abbr:'str'  },
-  { name: 'Laufband',      icon: '🏃', color: 'var(--accent)',   abbr:'run'  },
-  { name: 'Radfahren',     icon: '🚴', color: 'var(--bike)',     abbr:'bike' },
+  { name: 'Cardio/Kraft',   icon: '🔔', color: 'var(--strength)', abbr:'str'  },
+  { name: 'Krafttraining',  icon: '🏋️', color: 'var(--accent4)',  abbr:'str'  },
+  { name: 'Liegestütz',     icon: '💪', color: 'var(--run)',       abbr:'str'  },
+  { name: 'Laufband',       icon: '🏃', color: 'var(--accent)',   abbr:'run'  },
+  { name: 'Radfahren',      icon: '🚴', color: 'var(--bike)',     abbr:'bike' },
 ];
 
-// Gewichtung: ~65% Kraft, ~30% Laufband, ~5% Rad (sehr selten)
-const SPORT_WEIGHTS = [28, 22, 15, 30, 5];
+// Gewichtung basierend auf echten Garmin-Daten
+const SPORT_WEIGHTS = [35, 20, 20, 20, 5];
 
 function weightedSport() {
   const total = SPORT_WEIGHTS.reduce((a,b) => a+b, 0);
@@ -1183,7 +1184,13 @@ function renderActivityChart(days) {
 function renderSportChart(activities) {
   destroyChart('sport');
   const counts = {};
-  activities.forEach(a => { counts[a.sport.name] = (counts[a.sport.name] || 0) + 1; });
+  // Echte Aktivitäten aus LIVE_DATA verwenden
+  const liveActs = window.LIVE_DATA?.activities;
+  if (liveActs && liveActs.length > 0) {
+    liveActs.forEach(a => { counts[a.name] = (counts[a.name] || 0) + 1; });
+  } else {
+    activities.forEach(a => { counts[a.sport.name] = (counts[a.sport.name] || 0) + 1; });
+  }
   const labels = Object.keys(counts);
   const data   = Object.values(counts);
   const colors = SPORT_TYPES.filter(s => labels.includes(s.name)).map(s => s.color);
