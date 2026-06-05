@@ -12,9 +12,9 @@
     "light_pct": 44
   },
   "body_bat": {
-    "charged": 49,
+    "charged": 51,
     "drained": 11,
-    "current": 49
+    "current": 51
   },
   "rhr": {
     "value": 52,
