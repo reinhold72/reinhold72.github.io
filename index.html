@@ -334,7 +334,7 @@
   }
   .activity-header {
     display: grid;
-    grid-template-columns: 44px 1fr 90px 90px 80px 80px 80px;
+    grid-template-columns: 44px 1fr 70px 90px 90px 80px 80px 80px;
     padding: 12px 20px;
     font-size: 10px;
     letter-spacing: 1.5px;
@@ -345,7 +345,7 @@
   }
   .activity-row {
     display: grid;
-    grid-template-columns: 44px 1fr 90px 90px 80px 80px 80px;
+    grid-template-columns: 44px 1fr 70px 90px 90px 80px 80px 80px;
     padding: 14px 20px;
     border-bottom: 1px solid rgba(255,255,255,.03);
     align-items: center;
@@ -608,6 +608,7 @@
       <div class="activity-header">
         <div></div>
         <div>Aktivität</div>
+        <div>Zeit</div>
         <div>Distanz</div>
         <div>Dauer</div>
         <div class="hide-mobile">Tempo</div>
@@ -1098,6 +1099,7 @@ function renderLiveActivitiesTable(acts) {
         <div class="act-name">${a.name}</div>
         <div class="act-date">${a.date}</div>
       </div>
+      <div class="act-val" style="font-size:11px;">${a.time || '–'}</div>
       <div class="act-val">${a.dist && a.dist !== '–' ? a.dist : '–'}</div>
       <div class="act-val">${a.dur || '–'}</div>
       <div class="act-val hide-mobile">${a.is_run && a.pace !== '–' ? a.pace : '–'}</div>
