@@ -1119,14 +1119,14 @@ function renderDailySummaryTable(acts) {
     const durFormatted = h > 0 ? h + 'h ' + String(m).padStart(2,'0') + 'm' : m + ' min';
     const distFormatted = d.totalDist > 0 ? d.totalDist.toFixed(1) + ' km' : '–';
     const uniqueIcons = d.sports.filter(function(v, i, a) { return a.indexOf(v) === i; }).join(' ');
-    return '<div class="activity-row">'
+    return '<div style="display:grid;grid-template-columns:44px 1fr 90px 90px 80px;'
+      + 'padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.03);'
+      + 'align-items:center;font-size:13px;">'
       + '<div style="font-size:16px;">' + uniqueIcons + '</div>'
-      + '<div><div class="act-name">' + d.date + '</div></div>'
-      + '<div class="act-val">' + durFormatted + '</div>'
-      + '<div class="act-val">' + distFormatted + '</div>'
-      + '<div class="act-val hide-mobile">' + d.totalKcal + ' kcal</div>'
-      + '<div class="act-val hide-mobile">–</div>'
-      + '<div class="act-val hide-mobile">–</div>'
+      + '<div><div style="font-weight:500;">' + d.date + '</div></div>'
+      + '<div style="font-family:monospace;font-size:13px;">' + durFormatted + '</div>'
+      + '<div style="font-family:monospace;font-size:13px;color:#00e5c8;">' + distFormatted + '</div>'
+      + '<div style="font-family:monospace;font-size:13px;color:#ff5c5c;">' + d.totalKcal + ' kcal</div>'
       + '</div>';
   }).join('');
 
