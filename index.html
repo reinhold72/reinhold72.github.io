@@ -463,7 +463,7 @@
 <body>
 
 <!-- ── LOADING ── -->
-<div id="loading">
+<div id="loading" style="display:none;">
   <div class="loader-text">GARMIN ANALYTICS</div>
   <div class="loader-bar"><div class="loader-bar-fill"></div></div>
   <div class="loader-steps" id="loader-step">Lade Dashboard…</div>
@@ -1006,14 +1006,14 @@ async function showLoading() {
     await new Promise(r => setTimeout(r, 150));
   }
   document.getElementById('loading').classList.add('hidden');
-  // Dashboard sofort anzeigen mit Demo-Daten
+  // Sofort Dashboard zeigen
   initDashboard();
-  // Echte Daten im Hintergrund nachladen
-  loadLiveData().then(() => {
-    if (window.LIVE_DATA) {
-      renderAll(currentRange);
-    }
-  });
+  // Echte Daten still im Hintergrund versuchen (kein await!)
+  setTimeout(() => {
+    loadLiveData().then(() => {
+      if (window.LIVE_DATA) renderAll(currentRange);
+    }).catch(() => {});
+  }, 100);
 }
 
 // ══════════════════════════════════════════════════
@@ -1421,9 +1421,9 @@ function renderSportChart(activities) {
     if (n.includes('spazier') || n.includes('walk')) return '#9ba3c0';
     return null;
   }
-  const FALLBACK_COLORS = ['#ff5c5c','#7b61ff','#f5a623','#00e5c8','#4db8ff','#ff9040','#a0c878'];
+  const FALLBACK_SPORT = ['#ff5c5c','#7b61ff','#f5a623','#00e5c8','#4db8ff','#ff9040','#a0c878'];
   const colors = labels.map(function(l, i) {
-    return getSportColor(l) || FALLBACK_COLORS[i % FALLBACK_COLORS.length];
+    return getSportColor(l) || FALLBACK_SPORT[i % FALLBACK_SPORT.length];
   });
   const ctx = document.getElementById('sportChart').getContext('2d');
   charts['sport'] = new Chart(ctx, {
@@ -1806,9 +1806,17 @@ function renderWeekPlan() {
 }
 
 // Direkt starten ohne Login
-window.addEventListener('load', async () => {
+window.addEventListener('load', () => {
   userData = { name: 'Reinhold' };
-  await showLoading();
+  document.getElementById('dashboard').classList.add('visible');
+  document.getElementById('user-name').textContent = 'Reinhold';
+  document.getElementById('user-initials').textContent = 'R';
+  renderAll(currentRange);
+  setTimeout(() => {
+    loadLiveData().then(() => {
+      if (window.LIVE_DATA) renderAll(currentRange);
+    }).catch(() => {});
+  }, 500);
 });
 </script>
 </body>
