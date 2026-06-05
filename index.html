@@ -1079,12 +1079,16 @@ function renderAll(days) {
   renderStepsChart(days);
   renderSleep();
 
-  // Aktivitäten-Tabelle: 7T = alle einzeln, 30T+ = Tageszusammenfassung
+  // Aktivitäten-Tabelle je nach Zeitraum
   if (liveActs && liveActs.length > 0) {
     if (days <= 7) {
       renderLiveActivitiesTable(liveActs);
-    } else {
+    } else if (days <= 30) {
       renderDailySummaryTable(liveActs);
+    } else if (days <= 90) {
+      renderWeeklySummaryTable(liveActs);
+    } else {
+      renderMonthlySummaryTable(liveActs);
     }
   } else {
     renderActivitiesTable(activities.slice(0, 10));
@@ -1093,6 +1097,99 @@ function renderAll(days) {
   renderZones();
   renderStairsChart(days);
   renderAISection(activities);
+}
+
+function _summaryRow(label, icons, durFormatted, distFormatted, kcal) {
+  return '<div style="display:grid;grid-template-columns:44px 1fr 90px 90px 90px 80px 80px;'
+    + 'padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.03);align-items:center;font-size:13px;">'
+    + '<div style="font-size:15px;">' + icons + '</div>'
+    + '<div><div style="font-weight:500;color:#ffffff;">' + label + '</div></div>'
+    + '<div style="font-family:monospace;">' + durFormatted + '</div>'
+    + '<div style="font-family:monospace;color:#00e5c8;">' + distFormatted + '</div>'
+    + '<div style="font-family:monospace;color:#ff5c5c;">' + kcal + ' kcal</div>'
+    + '<div></div><div></div>'
+    + '</div>';
+}
+
+function _groupActivities(acts, getKey) {
+  const groups = {};
+  acts.forEach(function(a) {
+    const key = getKey(a);
+    if (!groups[key]) groups[key] = { label: key, totalKcal: 0, totalDist: 0, totalMin: 0, sports: [] };
+    groups[key].totalKcal += parseInt(a.kcal) || 0;
+    groups[key].totalDist += parseFloat((a.dist || '0').replace(' km','')) || 0;
+    const durStr = a.dur || '';
+    let mins = 0;
+    const hMatch = durStr.match(/(\d+)h/);
+    const mMatch = durStr.match(/(\d+)\s*m/);
+    if (hMatch) mins += parseInt(hMatch[1]) * 60;
+    if (mMatch) mins += parseInt(mMatch[1]);
+    groups[key].totalMin += mins;
+    groups[key].sports.push(a.icon);
+  });
+  return groups;
+}
+
+function _formatDur(totalMin) {
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  return h > 0 ? h + 'h ' + String(m).padStart(2,'0') + 'm' : m + ' min';
+}
+
+function renderWeeklySummaryTable(acts) {
+  // Nach Kalenderwoche gruppieren
+  const MONATE = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+  const groups = _groupActivities(acts, function(a) {
+    // KW aus Datum extrahieren (Format: "Mo 02.06.")
+    try {
+      const parts = a.date.match(/(\d+)\.(\d+)\./);
+      if (parts) {
+        const d = new Date(2026, parseInt(parts[2])-1, parseInt(parts[1]));
+        const startOfYear = new Date(d.getFullYear(), 0, 1);
+        const kw = Math.ceil(((d - startOfYear) / 86400000 + startOfYear.getDay() + 1) / 7);
+        return 'KW ' + String(kw).padStart(2,'0') + ' · ' + MONATE[d.getMonth()] + ' ' + d.getFullYear();
+      }
+    } catch(e) {}
+    return a.date;
+  });
+
+  const headerHtml = '<div style="display:grid;grid-template-columns:44px 1fr 90px 90px 90px 80px 80px;'
+    + 'padding:8px 20px;border-bottom:1px solid var(--border);font-size:10px;letter-spacing:1px;color:var(--muted);">'
+    + '<div></div><div>WOCHE</div><div>DAUER</div><div>DISTANZ</div><div>KALORIEN</div><div></div><div></div></div>';
+
+  const rows = Object.values(groups).map(function(d) {
+    const icons = d.sports.filter(function(v,i,a){return a.indexOf(v)===i;}).join(' ');
+    return _summaryRow(d.label, icons, _formatDur(d.totalMin), d.totalDist > 0 ? d.totalDist.toFixed(1)+' km' : '–', d.totalKcal);
+  }).join('');
+
+  document.getElementById('activity-rows').innerHTML = headerHtml + rows ||
+    '<div style="padding:16px;color:var(--muted);text-align:center;">Keine Aktivitäten</div>';
+}
+
+function renderMonthlySummaryTable(acts) {
+  const MONATE = ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+  const groups = _groupActivities(acts, function(a) {
+    try {
+      const parts = a.date.match(/(\d+)\.(\d+)\./);
+      if (parts) {
+        const d = new Date(2026, parseInt(parts[2])-1, 1);
+        return MONATE[d.getMonth()] + ' ' + d.getFullYear();
+      }
+    } catch(e) {}
+    return '?';
+  });
+
+  const headerHtml = '<div style="display:grid;grid-template-columns:44px 1fr 90px 90px 90px 80px 80px;'
+    + 'padding:8px 20px;border-bottom:1px solid var(--border);font-size:10px;letter-spacing:1px;color:var(--muted);">'
+    + '<div></div><div>MONAT</div><div>DAUER</div><div>DISTANZ</div><div>KALORIEN</div><div></div><div></div></div>';
+
+  const rows = Object.values(groups).map(function(d) {
+    const icons = d.sports.filter(function(v,i,a){return a.indexOf(v)===i;}).join(' ');
+    return _summaryRow(d.label, icons, _formatDur(d.totalMin), d.totalDist > 0 ? d.totalDist.toFixed(1)+' km' : '–', d.totalKcal);
+  }).join('');
+
+  document.getElementById('activity-rows').innerHTML = headerHtml + rows ||
+    '<div style="padding:16px;color:var(--muted);text-align:center;">Keine Aktivitäten</div>';
 }
 
 function renderDailySummaryTable(acts) {
@@ -1119,7 +1216,7 @@ function renderDailySummaryTable(acts) {
     const durFormatted = h > 0 ? h + 'h ' + String(m).padStart(2,'0') + 'm' : m + ' min';
     const distFormatted = d.totalDist > 0 ? d.totalDist.toFixed(1) + ' km' : '–';
     const uniqueIcons = d.sports.filter(function(v, i, a) { return a.indexOf(v) === i; }).join(' ');
-    return '<div style="display:grid;grid-template-columns:44px 1fr 90px 90px 80px;'
+    return '<div style="display:grid;grid-template-columns:44px 1fr 90px 90px 90px 80px 80px;'
       + 'padding:14px 20px;border-bottom:1px solid rgba(255,255,255,.03);'
       + 'align-items:center;font-size:13px;">'
       + '<div style="font-size:16px;">' + uniqueIcons + '</div>'
@@ -1127,10 +1224,15 @@ function renderDailySummaryTable(acts) {
       + '<div style="font-family:monospace;font-size:13px;">' + durFormatted + '</div>'
       + '<div style="font-family:monospace;font-size:13px;color:#00e5c8;">' + distFormatted + '</div>'
       + '<div style="font-family:monospace;font-size:13px;color:#ff5c5c;">' + d.totalKcal + ' kcal</div>'
+      + '<div></div><div></div>'
       + '</div>';
   }).join('');
 
-  document.getElementById('activity-rows').innerHTML = rows ||
+  const headerHtml = '<div style="display:grid;grid-template-columns:44px 1fr 90px 90px 90px 80px 80px;'
+    + 'padding:8px 20px;border-bottom:1px solid var(--border);font-size:10px;letter-spacing:1px;color:var(--muted);">'
+    + '<div></div><div>TAG</div><div>DAUER</div><div>DISTANZ</div><div>KALORIEN</div><div></div><div></div></div>';
+
+  document.getElementById('activity-rows').innerHTML = headerHtml + rows ||
     '<div style="padding:16px;color:var(--muted);text-align:center;">Keine Aktivitäten gefunden</div>';
 }
 
