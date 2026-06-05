@@ -229,7 +229,7 @@
   /* ── STAT CARDS (KPI ROW) ── */
   .kpi-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap: 16px;
     margin-bottom: 32px;
   }
@@ -496,7 +496,10 @@
 <!-- ── DASHBOARD ── -->
 <div id="dashboard">
   <div class="topbar">
-    <div class="topbar-logo">⬡ GARMIN ANALYTICS</div>
+    <div>
+      <div class="topbar-logo">⬡ GARMIN ANALYTICS</div>
+      <div style="font-size:11px;color:var(--accent);margin-top:2px;" id="live-date"></div>
+    </div>
     <div class="topbar-meta">
       <div class="date-range">
         <button class="date-btn" onclick="setRange(7, this)">7T</button>
@@ -547,6 +550,12 @@
         <div class="kpi-label">Ø Schritte/Tag</div>
         <div class="kpi-delta up">+5%</div>
       </div>
+      <div class="kpi-card" style="--kpi-color: #f5a623;">
+        <div class="kpi-icon">🪜</div>
+        <div><span class="kpi-value" id="kpi-stairs">–</span><span class="kpi-unit">Etg.</span></div>
+        <div class="kpi-label">Ø Treppen/Tag</div>
+        <div class="kpi-delta up">+8%</div>
+      </div>
     </div>
 
     <!-- CHARTS ROW 1 -->
@@ -564,7 +573,7 @@
     </div>
 
     <!-- CHARTS ROW 2 -->
-    <div class="charts-grid-3">
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:20px; margin-bottom:20px;">
       <div class="chart-card">
         <div class="chart-title">Herzfrequenz</div>
         <div class="chart-sub">Tagesverlauf (Ruhepuls + aktiv)</div>
@@ -574,6 +583,11 @@
         <div class="chart-title">Schritte</div>
         <div class="chart-sub">Tägliche Schrittanzahl</div>
         <div class="chart-wrap"><canvas id="stepsChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Treppensteigen</div>
+        <div class="chart-sub">Gekletterte Etagen täglich</div>
+        <div class="chart-wrap"><canvas id="stairsChart"></canvas></div>
       </div>
       <div class="chart-card">
         <div class="chart-title">Schlaf</div>
@@ -892,7 +906,7 @@ function generateActivities(n = 20) {
     const sport = weightedSport();
     const date = new Date(now - i * 1.5 * 86400000);
     const isStrength = sport.abbr === 'str';
-    const dist = isStrength ? 0 : parseFloat(rand(3, 35).toFixed(1));
+    const dist = isStrength ? 0 : parseFloat(rand(2, 12).toFixed(1));  // realistisch: 2-12 km
     const sec  = isStrength ? rand(1500, 3600) : dist * rand(280, 420);
     return {
       sport, date,
@@ -1000,13 +1014,41 @@ async function showLoading() {
 // ══════════════════════════════════════════════════
 //  DASHBOARD INIT
 // ══════════════════════════════════════════════════
-function initDashboard() {
+async function initDashboard() {
   document.getElementById('dashboard').classList.add('visible');
   document.getElementById('user-name').textContent = userData?.name || 'Athlet';
   const init = (userData?.name || 'G')[0].toUpperCase();
   document.getElementById('user-initials').textContent = init;
 
+  // Echte Daten von GitHub laden
+  await loadLiveData();
   renderAll(currentRange);
+}
+
+async function loadLiveData() {
+  try {
+    const url = 'https://reinhold72.github.io/daten.json?t=' + Date.now();
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error('Keine Daten');
+    const d = await resp.json();
+    window.LIVE_DATA = d;
+    console.log('✅ Echte Garmin-Daten geladen:', d.date);
+
+    // Datum anzeigen
+    const dateEl = document.getElementById('live-date');
+    if (dateEl) dateEl.textContent = d.date;
+  } catch(e) {
+    console.log('Demo-Modus (keine Live-Daten):', e.message);
+    window.LIVE_DATA = null;
+  }
+}
+
+function getLive(path, fallback) {
+  if (!window.LIVE_DATA) return fallback;
+  const parts = path.split('.');
+  let val = window.LIVE_DATA;
+  for (const p of parts) { val = val?.[p]; }
+  return val ?? fallback;
 }
 
 function setRange(days, el) {
@@ -1026,6 +1068,7 @@ function renderAll(days) {
   renderSleep();
   renderActivitiesTable(activities.slice(0, 10));
   renderZones();
+  renderStairsChart(days);
   renderAISection(activities);
 }
 
@@ -1038,9 +1081,21 @@ function renderKPIs(activities, days) {
   document.getElementById('kpi-distance').textContent = dist;
   const kcal = activities.reduce((s, a) => s + a.kcal, 0).toLocaleString('de');
   document.getElementById('kpi-calories').textContent = kcal;
-  const avgHr = Math.round(activities.reduce((s, a) => s + a.hr, 0) / activities.length);
-  document.getElementById('kpi-hr').textContent = avgHr;
-  document.getElementById('kpi-steps').textContent = randInt(70, 115) / 10;
+
+  // Echte Daten wenn verfügbar
+  const liveHr    = getLive('rhr.value', null);
+  const liveSteps = getLive('steps.total', null);
+  const liveBB    = getLive('body_bat.current', null);
+
+  document.getElementById('kpi-hr').textContent = liveHr || Math.round(activities.reduce((s,a)=>s+a.hr,0)/activities.length);
+  document.getElementById('kpi-steps').textContent = liveSteps ? (parseFloat(liveSteps.replace('.',''))/1000).toFixed(1) : randInt(70,115)/10;
+  document.getElementById('kpi-stairs').textContent = randInt(4, 18);
+
+  // Body Battery Badge in Topbar
+  if (liveBB && liveBB !== '–') {
+    document.getElementById('user-name').textContent =
+      (userData?.name || 'Athlet') + ' · 🔋' + liveBB + '%';
+  }
 }
 
 // ══════════════════════════════════════════════════
@@ -1071,7 +1126,7 @@ function renderActivityChart(days) {
       datasets: [
         { label: 'Kettlebell/Hantel', data: generateDailySeries(n, 0, 8),  backgroundColor: 'rgba(255,92,92,.75)',  borderRadius: 3 },
         { label: 'Bauchtraining',     data: generateDailySeries(n, 0, 6),  backgroundColor: 'rgba(123,97,255,.75)', borderRadius: 3 },
-        { label: 'Laufband',           data: generateDailySeries(n, 0, 10), backgroundColor: 'rgba(0,229,200,.7)',   borderRadius: 3 },
+        { label: 'Laufband',           data: generateDailySeries(n, 0, 6),  backgroundColor: 'rgba(0,229,200,.7)',   borderRadius: 3 },
         { label: 'Radfahren (selten)', data: generateDailySeries(n, 0, 4),  backgroundColor: 'rgba(77,184,255,.4)',  borderRadius: 3 },
       ],
     },
@@ -1152,13 +1207,32 @@ function renderStepsChart(days) {
   });
 }
 
+function renderStairsChart(days) {
+  destroyChart('stairs');
+  const n = Math.min(days, 30);
+  const labels = getLabels(n);
+  const data   = Array.from({length: n}, () => randInt(2, 20));
+  const goal   = 10;
+  const colors = data.map(v => v >= goal ? 'rgba(245,166,35,.85)' : 'rgba(245,166,35,.4)');
+  const ctx = document.getElementById('stairsChart').getContext('2d');
+  charts['stairs'] = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderRadius: 3 }] },
+    options: {
+      ...CHART_DEFAULTS,
+      responsive: true, maintainAspectRatio: false,
+    },
+  });
+}
+
 function renderSleep() {
-  const total = parseFloat(rand(5.5, 8.5).toFixed(1));
+  const liveTotal = getLive('sleep.total', null);
+  const total = liveTotal || parseFloat(rand(5.5, 8.5).toFixed(1));
   document.getElementById('sleep-total').textContent = total;
   const stages = [
-    { name: 'Tief',   pct: randInt(15, 25), color: '#4db8ff' },
-    { name: 'REM',    pct: randInt(18, 28), color: '#7b61ff' },
-    { name: 'Leicht', pct: randInt(40, 55), color: '#00e5c8' },
+    { name: 'Tief',   pct: getLive('sleep.deep_pct',  randInt(15,25)), color: '#4db8ff' },
+    { name: 'REM',    pct: getLive('sleep.rem_pct',   randInt(18,28)), color: '#7b61ff' },
+    { name: 'Leicht', pct: getLive('sleep.light_pct', randInt(40,55)), color: '#00e5c8' },
     { name: 'Wach',   pct: randInt(3, 8),   color: '#ff5c5c' },
   ];
   const el = document.getElementById('sleep-stages');
