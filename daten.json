@@ -44,7 +44,7 @@
   },
   "activities": [
     {
-      "icon": "💪",
+      "icon": "🔔",
       "name": "Cardio",
       "date": "Fr 05.06.",
       "time": "07:39",
@@ -56,7 +56,7 @@
     },
     {
       "icon": "🏋️",
-      "name": "Krafttraining",
+      "name": "Liegestütz",
       "date": "Do 04.06.",
       "time": "22:59",
       "dur": "0 min",
@@ -67,7 +67,7 @@
     },
     {
       "icon": "🏃",
-      "name": "Laufband",
+      "name": "Steigerungsintervalle",
       "date": "Do 04.06.",
       "time": "18:28",
       "dur": "45 min",
@@ -77,12 +77,188 @@
       "is_run": true
     },
     {
-      "icon": "💪",
+      "icon": "🔔",
       "name": "Cardio",
       "date": "Do 04.06.",
       "time": "07:39",
       "dur": "14 min",
       "kcal": 86,
+      "dist": "–",
+      "pace": "–",
+      "is_run": false
+    },
+    {
+      "icon": "🏋️",
+      "name": "Liegestütz",
+      "date": "Mi 03.06.",
+      "time": "23:15",
+      "dur": "1 min",
+      "kcal": 6,
+      "dist": "–",
+      "pace": "–",
+      "is_run": false
+    },
+    {
+      "icon": "🔔",
+      "name": "Cardio",
+      "date": "Mi 03.06.",
+      "time": "07:35",
+      "dur": "19 min",
+      "kcal": 108,
+      "dist": "–",
+      "pace": "–",
+      "is_run": false
+    },
+    {
+      "icon": "🏋️",
+      "name": "Liegestütz",
+      "date": "Di 02.06.",
+      "time": "22:59",
+      "dur": "0 min",
+      "kcal": 6,
+      "dist": "–",
+      "pace": "–",
+      "is_run": false
+    },
+    {
+      "icon": "🔔",
+      "name": "Cardio",
+      "date": "Di 02.06.",
+      "time": "07:36",
+      "dur": "15 min",
+      "kcal": 105,
+      "dist": "–",
+      "pace": "–",
+      "is_run": false
+    },
+    {
+      "icon": "🔔",
+      "name": "Cardio",
+      "date": "Mo 01.06.",
+      "time": "19:32",
+      "dur": "29 min",
+      "kcal": 145,
+      "dist": "–",
+      "pace": "–",
+      "is_run": false
+    },
+    {
+      "icon": "🏋️",
+      "name": "Liegestütz",
+      "date": "So 31.05.",
+      "time": "22:54",
+      "dur": "0 min",
+      "kcal": 5,
+      "dist": "–",
+      "pace": "–",
+      "is_run": false
+    },
+    {
+      "icon": "🏃",
+      "name": "Locker laufen",
+      "date": "So 31.05.",
+      "time": "15:20",
+      "dur": "50 min",
+      "kcal": 542,
+      "dist": "4.93 km",
+      "pace": "10:16 /km",
+      "is_run": true
+    },
+    {
+      "icon": "🏃",
+      "name": "Laufbandtraining",
+      "date": "Sa 30.05.",
+      "time": "08:54",
+      "dur": "28 min",
+      "kcal": 294,
+      "dist": "3.85 km",
+      "pace": "7:22 /km",
+      "is_run": true
+    },
+    {
+      "icon": "🏋️",
+      "name": "Liegestütz",
+      "date": "Do 28.05.",
+      "time": "22:42",
+      "dur": "1 min",
+      "kcal": 5,
+      "dist": "–",
+      "pace": "–",
+      "is_run": false
+    },
+    {
+      "icon": "🏋️",
+      "name": "Gewichte",
+      "date": "Do 28.05.",
+      "time": "07:41",
+      "dur": "9 min",
+      "kcal": 31,
+      "dist": "–",
+      "pace": "–",
+      "is_run": false
+    },
+    {
+      "icon": "🔔",
+      "name": "Cardio",
+      "date": "Mi 27.05.",
+      "time": "07:38",
+      "dur": "16 min",
+      "kcal": 89,
+      "dist": "–",
+      "pace": "–",
+      "is_run": false
+    },
+    {
+      "icon": "🏋️",
+      "name": "Liegestütz",
+      "date": "Di 26.05.",
+      "time": "22:53",
+      "dur": "1 min",
+      "kcal": 6,
+      "dist": "–",
+      "pace": "–",
+      "is_run": false
+    },
+    {
+      "icon": "🏃",
+      "name": "Steigerungsintervalle",
+      "date": "Mo 25.05.",
+      "time": "10:24",
+      "dur": "31 min",
+      "kcal": 322,
+      "dist": "3.94 km",
+      "pace": "7:56 /km",
+      "is_run": true
+    },
+    {
+      "icon": "🔔",
+      "name": "Cardio",
+      "date": "Mo 25.05.",
+      "time": "09:02",
+      "dur": "12 min",
+      "kcal": 86,
+      "dist": "–",
+      "pace": "–",
+      "is_run": false
+    },
+    {
+      "icon": "🏃",
+      "name": "Locker laufen",
+      "date": "Sa 23.05.",
+      "time": "17:07",
+      "dur": "40 min",
+      "kcal": 442,
+      "dist": "4.97 km",
+      "pace": "8:04 /km",
+      "is_run": true
+    },
+    {
+      "icon": "🔔",
+      "name": "Cardio",
+      "date": "Fr 22.05.",
+      "time": "07:39",
+      "dur": "13 min",
+      "kcal": 73,
       "dist": "–",
       "pace": "–",
       "is_run": false
