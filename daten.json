@@ -1,0 +1,87 @@
+{
+  "date": "Freitag, 05. Juni 2026",
+  "sleep": {
+    "total": "7h 03m",
+    "deep": "2h 05m",
+    "rem": "1h 52m",
+    "light": "3h 06m",
+    "awake": "0h 06m",
+    "score": 85,
+    "deep_pct": 30,
+    "rem_pct": 26,
+    "light_pct": 44
+  },
+  "body_bat": {
+    "charged": 49,
+    "drained": 11,
+    "current": 49
+  },
+  "rhr": {
+    "value": 52,
+    "avg7": 52
+  },
+  "stress": {
+    "avg": 20,
+    "rest": "–"
+  },
+  "weight": {
+    "kg": 75.9,
+    "bmi": 24.8,
+    "fat_pct": 19.0,
+    "muscle_kg": 58.3,
+    "muscle_pct": 76.8,
+    "bone_mass": 3.07,
+    "water_pct": 55.1,
+    "visceral": 3
+  },
+  "steps": {
+    "total": "13.305",
+    "goal": 10000,
+    "pct": 133
+  },
+  "spo2": {
+    "avg": 97.0
+  },
+  "activities": [
+    {
+      "icon": "💪",
+      "name": "Cardio",
+      "date": "Fr 05.06.",
+      "dur": "13 min",
+      "kcal": 83,
+      "dist": "–",
+      "pace": "–",
+      "is_run": false
+    },
+    {
+      "icon": "🏋️",
+      "name": "Krafttraining",
+      "date": "Do 04.06.",
+      "dur": "0 min",
+      "kcal": 6,
+      "dist": "–",
+      "pace": "–",
+      "is_run": false
+    },
+    {
+      "icon": "🏃",
+      "name": "Laufband",
+      "date": "Do 04.06.",
+      "dur": "45 min",
+      "kcal": 511,
+      "dist": "5.97 km",
+      "pace": "7:37 /km",
+      "is_run": true
+    },
+    {
+      "icon": "💪",
+      "name": "Cardio",
+      "date": "Do 04.06.",
+      "dur": "14 min",
+      "kcal": 86,
+      "dist": "–",
+      "pace": "–",
+      "is_run": false
+    }
+  ]
+}
