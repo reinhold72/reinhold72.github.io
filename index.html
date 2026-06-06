@@ -334,7 +334,7 @@
   }
   .activity-header {
     display: grid;
-    grid-template-columns: 44px 1fr 70px 90px 90px 80px 80px 80px;
+    grid-template-columns: 44px 1fr 70px 80px 90px 90px 90px;
     padding: 12px 20px;
     font-size: 10px;
     letter-spacing: 1.5px;
@@ -345,7 +345,7 @@
   }
   .activity-row {
     display: grid;
-    grid-template-columns: 44px 1fr 70px 90px 90px 80px 80px 80px;
+    grid-template-columns: 44px 1fr 70px 80px 90px 90px 90px;
     padding: 14px 20px;
     border-bottom: 1px solid rgba(255,255,255,.03);
     align-items: center;
@@ -609,10 +609,9 @@
         <div></div>
         <div>Aktivität</div>
         <div>Zeit</div>
-        <div>Distanz</div>
         <div>Dauer</div>
+        <div class="hide-mobile">Distanz</div>
         <div class="hide-mobile">Tempo</div>
-        <div class="hide-mobile">HF</div>
         <div class="hide-mobile">Kalorien</div>
       </div>
       <div id="activity-rows"></div>
@@ -1248,10 +1247,9 @@ function renderLiveActivitiesTable(acts) {
         <div class="act-date">${a.date}</div>
       </div>
       <div class="act-val" style="font-size:11px;color:var(--muted);">${a.time || '–'} Uhr</div>
-      <div class="act-val">${a.dist && a.dist !== '–' ? a.dist : '–'}</div>
       <div class="act-val">${a.dur || '–'}</div>
+      <div class="act-val hide-mobile">${a.dist && a.dist !== '–' ? a.dist : '–'}</div>
       <div class="act-val hide-mobile">${a.is_run && a.pace !== '–' ? a.pace : '–'}</div>
-      <div class="act-val act-hr hide-mobile">–</div>
       <div class="act-val hide-mobile">${a.kcal ? a.kcal + ' kcal' : '–'}</div>
     </div>
   `).join('');
@@ -1310,10 +1308,10 @@ function renderActivityChart(days) {
     // Farben nach Sporttyp — erkennt echte Garmin-Namen automatisch
     function getActivityColor(name) {
       const n = (name || '').toLowerCase();
+      if (n.includes('lauf') || n.includes('run') || n.includes('jogg') || n.includes('intervall') || n.includes('locker') || n.includes('crescendo') || n.includes('sprint') || n.includes('treadmill'))
+        return 'rgba(0,229,200,.8)';
       if (n.includes('cardio') || n.includes('kraft') || n.includes('gewicht') || n.includes('liegestütz'))
         return 'rgba(255,92,92,.8)';
-      if (n.includes('lauf') || n.includes('run') || n.includes('jogg') || n.includes('intervall') || n.includes('locker'))
-        return 'rgba(0,229,200,.8)';
       if (n.includes('rad') || n.includes('bike') || n.includes('cycling'))
         return 'rgba(77,184,255,.8)';
       if (n.includes('hiit') || n.includes('tabata'))
