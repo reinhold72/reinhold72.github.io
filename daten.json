@@ -39,6 +39,10 @@
     "goal": 10000,
     "pct": 90
   },
+  "floors": {
+    "ascended": "–",
+    "goal": 10
+  },
   "spo2": {
     "avg": 97.0
   },
