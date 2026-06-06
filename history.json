@@ -41,8 +41,9 @@
       "pct": 90
     },
     "floors": {
-      "ascended": "–",
-      "goal": 10
+      "ascended": 7.4,
+      "goal": 10,
+      "meters": 22.6
     },
     "spo2": {
       "avg": 97.0
