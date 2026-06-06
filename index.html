@@ -1065,21 +1065,6 @@ function renderAll(days) {
   renderStepsChart(days);
   renderSleep();
 
-  // Aktivitäten-Tabelle je nach Zeitraum
-  if (liveActs && liveActs.length > 0) {
-    if (days <= 7) {
-      renderLiveActivitiesTable(liveActs);
-    } else if (days <= 30) {
-      renderDailySummaryTable(liveActs);
-    } else if (days <= 90) {
-      renderWeeklySummaryTable(liveActs);
-    } else {
-      renderMonthlySummaryTable(liveActs);
-    }
-  } else {
-    renderActivitiesTable(activities.slice(0, 10));
-  }
-
   renderZones();
   renderStairsChart(days);
   renderAISection(activities);
