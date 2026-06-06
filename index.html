@@ -130,6 +130,7 @@
     .cards { grid-template-columns: repeat(2, 1fr); }
   }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -201,7 +202,7 @@ function sleepBar(name, pct, color, time) {
   </div>`;
 }
 
-function render(d) {
+function render(d, history) {
   const sc   = getLive(d, 'sleep.score', '–');
   const bb   = getLive(d, 'body_bat.current', '–');
   const rhr  = getLive(d, 'rhr.value', '–');
@@ -341,24 +342,78 @@ function render(d) {
     </div>
 
   `;
+
+  // 30-Tage History Charts
+  if (history && history.length > 1) {
+    renderHistory(history);
+  }
+}
+
+async function fetchJson(url) {
+  const c = new AbortController();
+  const t = setTimeout(() => c.abort(), 8000);
+  const r = await fetch(url + '?t=' + Date.now(), { signal: c.signal });
+  clearTimeout(t);
+  if (!r.ok) throw new Error('Fehler');
+  return await r.json();
 }
 
 async function loadData() {
   document.getElementById('date-badge').textContent = 'Lade…';
   try {
-    const url = 'https://reinhold72.github.io/daten.json?t=' + Date.now();
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
-    const resp = await fetch(url, { signal: controller.signal });
-    clearTimeout(timeout);
-    if (!resp.ok) throw new Error('Keine Daten');
-    const data = await resp.json();
-    render(data);
+    const data = await fetchJson('https://reinhold72.github.io/daten.json');
+    let history = [];
+    try { history = await fetchJson('https://reinhold72.github.io/history.json'); } catch(e) {}
+    render(data, history);
   } catch(e) {
     document.getElementById('main-content').innerHTML =
-      '<div class="status">⚠️ Keine Daten verfügbar.<br><br>Bitte Script ausführen:<br><code>python3 ~/garmin_report/garmin_morning_report.py</code></div>';
+      '<div class="status">Keine Daten.<br><br>Script ausführen:<br><code>python3 ~/garmin_report/garmin_morning_report.py</code></div>';
     document.getElementById('date-badge').textContent = 'Keine Daten';
   }
+}
+
+
+// 30-Tage History Charts
+function sparkline(id, vals, color, lbl) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (!window._ch) window._ch = {};
+  if (window._ch[id]) window._ch[id].destroy();
+  window._ch[id] = new Chart(el, {
+    type: 'line',
+    data: { labels: vals.map((_,i) => i), datasets: [{ data: vals, borderColor: color, backgroundColor: color.replace('rgb(','rgba(').replace(')',',0.08)'), tension: .4, fill: true, pointRadius: 2, borderWidth: 2 }] },
+    options: {
+      animation: { duration: 500 },
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { display: false },
+        y: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#8896b0', font: { size: 10 } } }
+      },
+      responsive: true, maintainAspectRatio: false,
+    }
+  });
+}
+
+function renderHistory(history) {
+  const s = document.createElement('div');
+  s.className = 'section';
+  s.style.marginBottom = '16px';
+  s.innerHTML = `
+    <div class="section-head">📈 30-Tage Verlauf (${history.length} Tage)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div><div style="font-size:11px;color:var(--muted);margin-bottom:6px;">😴 Schlaf-Score</div><div style="height:90px;"><canvas id="h-sleep"></canvas></div></div>
+      <div><div style="font-size:11px;color:var(--muted);margin-bottom:6px;">❤️ Ruhepuls (bpm)</div><div style="height:90px;"><canvas id="h-rhr"></canvas></div></div>
+      <div><div style="font-size:11px;color:var(--muted);margin-bottom:6px;">🔋 Body Battery (%)</div><div style="height:90px;"><canvas id="h-bb"></canvas></div></div>
+      <div><div style="font-size:11px;color:var(--muted);margin-bottom:6px;">⚖️ Gewicht (kg)</div><div style="height:90px;"><canvas id="h-weight"></canvas></div></div>
+    </div>`;
+  document.getElementById('main-content').appendChild(s);
+  const rev = [...history].reverse();
+  setTimeout(() => {
+    sparkline('h-sleep',  rev.map(h => parseInt(h.sleep?.score)||null).filter(v=>v!==null),     'rgb(123,97,255)', 'Score');
+    sparkline('h-rhr',    rev.map(h => parseInt(h.rhr?.value)||null).filter(v=>v!==null),        'rgb(255,92,92)',  'bpm');
+    sparkline('h-bb',     rev.map(h => parseInt(h.body_bat?.current)||null).filter(v=>v!==null), 'rgb(0,229,200)', '%');
+    sparkline('h-weight', rev.map(h => parseFloat(h.weight?.kg)||null).filter(v=>v!==null),      'rgb(245,166,35)','kg');
+  }, 200);
 }
 
 window.addEventListener('load', loadData);
