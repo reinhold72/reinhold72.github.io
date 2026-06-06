@@ -1247,12 +1247,12 @@ function renderLiveActivitiesTable(acts) {
         <div class="act-name">${a.name}</div>
         <div class="act-date">${a.date}</div>
       </div>
-      <div class="act-val" style="font-size:11px;">${a.time || '–'}</div>
+      <div class="act-val" style="font-size:11px;color:var(--muted);">${a.time || '–'} Uhr</div>
       <div class="act-val">${a.dist && a.dist !== '–' ? a.dist : '–'}</div>
       <div class="act-val">${a.dur || '–'}</div>
       <div class="act-val hide-mobile">${a.is_run && a.pace !== '–' ? a.pace : '–'}</div>
       <div class="act-val act-hr hide-mobile">–</div>
-      <div class="act-val hide-mobile">${a.kcal || '–'} kcal</div>
+      <div class="act-val hide-mobile">${a.kcal ? a.kcal + ' kcal' : '–'}</div>
     </div>
   `).join('');
   document.getElementById('activity-rows').innerHTML = html || '<div style="padding:16px;color:var(--muted);text-align:center;">Keine Aktivitäten gefunden</div>';
