@@ -45,6 +45,19 @@
     padding: 5px 12px; border-radius: 20px;
     border: 1px solid var(--border);
   }
+  .date-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px; padding: 6px 14px;
+    border-radius: 20px; cursor: pointer;
+    transition: all .2s;
+  }
+  .date-btn.active, .date-btn:hover {
+    border-color: var(--accent); color: var(--accent);
+    background: rgba(0,229,200,.1);
+  }
   .update-btn {
     background: rgba(0,229,200,.1);
     border: 1px solid rgba(0,229,200,.3);
@@ -137,6 +150,11 @@
 <div class="topbar">
   <div class="logo">⬡ GARMIN</div>
   <div class="date-badge" id="date-badge">Lade…</div>
+  <div style="display:flex;gap:6px;">
+    <button class="date-btn active" onclick="setRange(7,this)">7T</button>
+    <button class="date-btn" onclick="setRange(30,this)">30T</button>
+    <button class="date-btn" onclick="setRange(90,this)">3M</button>
+  </div>
   <button class="update-btn" onclick="loadData()">↻ Aktualisieren</button>
 </div>
 
@@ -320,12 +338,25 @@ function render(d, history) {
 
   `;
 
-  // 30-Tage History Charts
+  // History Charts
   if (history && history.length > 1) {
-    renderTrend(history);
-    renderHistory(history);
+    renderTrend(history, currentRange);
+    renderHistory(history, currentRange);
   } else {
-    renderTrend([]);
+    renderTrend([], currentRange);
+  }
+}
+
+let currentRange = 7;
+let cachedHistory = [];
+
+function setRange(days, el) {
+  currentRange = days;
+  document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+  if (cachedHistory.length > 0) {
+    renderTrend(cachedHistory, days);
+    renderHistory(cachedHistory, days);
   }
 }
 
@@ -344,6 +375,7 @@ async function loadData() {
     const data = await fetchJson('https://reinhold72.github.io/daten.json');
     let history = [];
     try { history = await fetchJson('https://reinhold72.github.io/history.json'); } catch(e) {}
+    cachedHistory = history;
     render(data, history);
   } catch(e) {
     document.getElementById('main-content').innerHTML =
@@ -354,11 +386,13 @@ async function loadData() {
 
 
 // Entwicklungsanalyse
-function renderTrend(history) {
+function renderTrend(history, days) {
   const section = document.getElementById('trend-section');
   if (!section) return;
-  const n = history.length;
+  const daysWanted = days || currentRange || 7;
+  const n = Math.min(history.length, daysWanted);
   const needed = 7;
+  const hist = history.slice(0, n);
 
   if (n < 2) {
     section.innerHTML = `
@@ -378,7 +412,7 @@ function renderTrend(history) {
   }
   function fmt(v, dec) { return v !== null && v !== undefined ? parseFloat(v).toFixed(dec||0) : '–'; }
 
-  const rev    = [...history].reverse();
+  const rev    = [...hist].reverse();
   const last7  = rev.slice(0, Math.min(7,n));
   const prev7  = rev.slice(Math.min(7,n), Math.min(14,n));
 
@@ -434,7 +468,7 @@ function renderTrend(history) {
 
   section.innerHTML = `
     <div class="section" style="margin-bottom:16px;">
-      <div class="section-head">📈 Entwicklungsanalyse (letzte ${Math.min(n,7)} Tage)</div>
+      <div class="section-head">📈 Entwicklungsanalyse (letzte ${Math.min(n, daysWanted)} Tage)</div>
       ${daysNote}
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
         ${row('😴','Schlaf-Score', fmt(sleepAvg), 'Pkt Ø', sleepDiff, false)}
@@ -467,12 +501,12 @@ function sparkline(id, vals, color, lbl) {
   });
 }
 
-function renderHistory(history) {
+function renderHistory(history, days) {
   const s = document.createElement('div');
   s.className = 'section';
   s.style.marginBottom = '16px';
   s.innerHTML = `
-    <div class="section-head">📈 30-Tage Verlauf (${history.length} Tage)</div>
+    <div class="section-head">📈 Verlauf (${Math.min(history.length, daysH)} Tage)</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
       <div><div style="font-size:11px;color:var(--muted);margin-bottom:6px;">😴 Schlaf-Score</div><div style="height:90px;"><canvas id="h-sleep"></canvas></div></div>
       <div><div style="font-size:11px;color:var(--muted);margin-bottom:6px;">❤️ Ruhepuls (bpm)</div><div style="height:90px;"><canvas id="h-rhr"></canvas></div></div>
@@ -480,7 +514,8 @@ function renderHistory(history) {
       <div><div style="font-size:11px;color:var(--muted);margin-bottom:6px;">⚖️ Gewicht (kg)</div><div style="height:90px;"><canvas id="h-weight"></canvas></div></div>
     </div>`;
   document.getElementById('main-content').appendChild(s);
-  const rev = [...history].reverse();
+  const daysH = days || currentRange || 7;
+  const rev = [...history].slice(0, daysH).reverse();
   setTimeout(() => {
     sparkline('h-sleep',  rev.map(h => parseInt(h.sleep?.score)||null).filter(v=>v!==null),     'rgb(123,97,255)', 'Score');
     sparkline('h-rhr',    rev.map(h => parseInt(h.rhr?.value)||null).filter(v=>v!==null),        'rgb(255,92,92)',  'bpm');
