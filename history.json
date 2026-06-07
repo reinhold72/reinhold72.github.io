@@ -64,7 +64,7 @@
     },
     "body_bat": {
       "charged": 64,
-      "drained": 15,
+      "drained": 29,
       "current": 64
     },
     "rhr": {
@@ -72,7 +72,7 @@
       "avg7": 52
     },
     "stress": {
-      "avg": 21,
+      "avg": 22,
       "rest": "–"
     },
     "weight": {
