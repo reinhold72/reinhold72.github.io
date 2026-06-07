@@ -447,6 +447,7 @@ function renderTrend(history) {
 }
 
 // 30-Tage History Charts
+function sparkline(id, vals, color, lbl) {
   const el = document.getElementById(id);
   if (!el) return;
   if (!window._ch) window._ch = {};
