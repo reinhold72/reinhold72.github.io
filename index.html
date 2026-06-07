@@ -5,145 +5,44 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Garmin Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   :root {
-    --bg: #0a0c10;
-    --surface: #13171f;
-    --border: #1e2535;
-    --accent: #00e5c8;
-    --accent2: #ff5c5c;
-    --accent3: #f5a623;
-    --accent4: #7b61ff;
-    --accent5: #4db8ff;
-    --text: #ffffff;
-    --muted: #8896b0;
+    --bg: #0a0c10; --surface: #13171f; --border: #1e2535;
+    --accent: #00e5c8; --accent2: #ff5c5c; --accent3: #f5a623;
+    --accent4: #7b61ff; --text: #ffffff; --muted: #8896b0;
   }
   * { margin:0; padding:0; box-sizing:border-box; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-  }
-
-  /* TOPBAR */
-  .topbar {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 18px 28px;
-    background: rgba(10,12,16,.95);
-    border-bottom: 1px solid var(--border);
-    position: sticky; top: 0; z-index: 10;
-    backdrop-filter: blur(10px);
-  }
-  .logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px; letter-spacing: 3px; color: var(--accent);
-  }
-  .date-badge {
-    font-size: 12px; color: var(--muted);
-    background: var(--surface);
-    padding: 5px 12px; border-radius: 20px;
-    border: 1px solid var(--border);
-  }
-  .date-btn {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px; padding: 6px 14px;
-    border-radius: 20px; cursor: pointer;
-    transition: all .2s;
-  }
-  .date-btn.active, .date-btn:hover {
-    border-color: var(--accent); color: var(--accent);
-    background: rgba(0,229,200,.1);
-  }
-  .update-btn {
-    background: rgba(0,229,200,.1);
-    border: 1px solid rgba(0,229,200,.3);
-    color: var(--accent);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 12px; padding: 6px 14px;
-    border-radius: 20px; cursor: pointer;
-    transition: all .2s;
-  }
-  .update-btn:hover { background: rgba(0,229,200,.2); }
-
-  /* MAIN */
-  .main { padding: 28px; max-width: 900px; margin: 0 auto; }
-
-  /* SECTION */
-  .section {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 22px;
-    margin-bottom: 16px;
-  }
-  .section-head {
-    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
-    color: var(--muted); margin-bottom: 18px; font-weight: 500;
-  }
-
-  /* CARDS GRID */
-  .cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 12px;
-  }
-  .card {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 16px 14px;
-    text-align: center;
-  }
-  .card-icon { font-size: 22px; margin-bottom: 8px; }
-  .card-value {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 32px; line-height: 1;
-    color: var(--text);
-  }
-  .card-unit { font-size: 12px; color: var(--muted); margin-left: 2px; }
-  .card-label {
-    font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
-    color: var(--muted); margin-top: 6px;
-  }
-
-  /* SCHLAF BAR */
-  .sleep-bar-row {
-    display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
-  }
-  .sleep-bar-label { font-size: 11px; color: var(--muted); width: 55px; text-transform: uppercase; letter-spacing: 1px; }
-  .sleep-bar-wrap { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
-  .sleep-bar-fill { height: 100%; border-radius: 4px; transition: width .8s ease; }
-  .sleep-bar-pct { font-size: 11px; color: var(--muted); width: 32px; text-align: right; font-family: 'DM Mono'; }
-  .sleep-bar-time { font-size: 11px; color: var(--text); width: 45px; text-align: right; font-family: 'DM Mono'; }
-
-  /* KI ANALYSE */
-  .ki-block { margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,.05); }
-  .ki-block:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-  .ki-block-title { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px; font-weight: 500; }
-  .ki-block-text { font-size: 13px; color: #c0c8e0; line-height: 1.7; }
-
-  /* TAGESFORM */
-  .tagesform-score {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 64px; line-height: 1;
-    text-align: center; margin-bottom: 4px;
-  }
-  .tagesform-label { text-align: center; font-size: 13px; font-weight: 600; margin-bottom: 16px; }
-
-  /* STATUS */
-  .status { text-align: center; padding: 40px; color: var(--muted); font-size: 14px; }
-
-  @media (max-width: 600px) {
-    .main { padding: 16px; }
-    .topbar { padding: 14px 16px; }
-    .cards { grid-template-columns: repeat(2, 1fr); }
-  }
+  body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; }
+  .topbar { display:flex; align-items:center; justify-content:space-between; padding:18px 28px; background:rgba(10,12,16,.95); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:10; backdrop-filter:blur(10px); flex-wrap:wrap; gap:10px; }
+  .logo { font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:3px; color:var(--accent); }
+  .date-badge { font-size:12px; color:var(--muted); background:var(--surface); padding:5px 12px; border-radius:20px; border:1px solid var(--border); }
+  .date-btn { background:var(--surface); border:1px solid var(--border); color:var(--muted); font-family:'DM Sans',sans-serif; font-size:12px; padding:6px 14px; border-radius:20px; cursor:pointer; transition:all .2s; }
+  .date-btn.active, .date-btn:hover { border-color:var(--accent); color:var(--accent); background:rgba(0,229,200,.1); }
+  .update-btn { background:rgba(0,229,200,.1); border:1px solid rgba(0,229,200,.3); color:var(--accent); font-family:'DM Sans',sans-serif; font-size:12px; padding:6px 14px; border-radius:20px; cursor:pointer; transition:all .2s; }
+  .update-btn:hover { background:rgba(0,229,200,.2); }
+  .main { padding:28px; max-width:900px; margin:0 auto; }
+  .section { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:22px; margin-bottom:16px; }
+  .section-head { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:18px; font-weight:500; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:12px; }
+  .card { background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:16px 14px; text-align:center; }
+  .card-icon { font-size:22px; margin-bottom:8px; }
+  .card-value { font-family:'Bebas Neue',sans-serif; font-size:32px; line-height:1; }
+  .card-unit { font-size:12px; color:var(--muted); margin-left:2px; }
+  .card-label { font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-top:6px; }
+  .sleep-bar-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .sleep-bar-label { font-size:11px; color:var(--muted); width:55px; text-transform:uppercase; letter-spacing:1px; }
+  .sleep-bar-wrap { flex:1; height:8px; background:var(--border); border-radius:4px; overflow:hidden; }
+  .sleep-bar-fill { height:100%; border-radius:4px; transition:width .8s ease; }
+  .sleep-bar-pct { font-size:11px; color:var(--muted); width:32px; text-align:right; font-family:'DM Mono'; }
+  .sleep-bar-time { font-size:11px; color:var(--text); width:45px; text-align:right; font-family:'DM Mono'; }
+  .ki-block { margin-bottom:14px; padding-bottom:14px; border-bottom:1px solid rgba(255,255,255,.05); }
+  .ki-block:last-child { border-bottom:none; margin-bottom:0; padding-bottom:0; }
+  .ki-block-title { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; margin-bottom:6px; font-weight:500; }
+  .ki-block-text { font-size:13px; color:#c0c8e0; line-height:1.7; }
+  .status { text-align:center; padding:40px; color:var(--muted); font-size:14px; line-height:1.8; }
+  @media (max-width:600px) { .main { padding:16px; } .topbar { padding:14px 16px; } .cards { grid-template-columns:repeat(2,1fr); } }
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -163,50 +62,27 @@
 </div>
 
 <script>
+let currentRange = 7;
+let cachedHistory = [];
+
 function getLive(data, path, fallback) {
   if (!data) return fallback;
   const parts = path.split('.');
   let val = data;
   for (const p of parts) { val = val?.[p]; }
-  return val ?? fallback;
+  return (val !== undefined && val !== null) ? val : fallback;
 }
 
-function scoreColor(score) {
-  if (score === '–' || !score) return '#8896b0';
-  const s = parseInt(score);
-  if (s >= 80) return '#00e5c8';
-  if (s >= 60) return '#f5a623';
-  return '#ff5c5c';
-}
-
-function tagesform(sleep, bb, rhr, stress) {
-  let p = 0, max = 0;
-  if (sleep !== '–' && sleep) {
-    max += 4; const s = parseInt(sleep);
-    if (s >= 85) p += 4; else if (s >= 70) p += 3; else if (s >= 55) p += 2; else if (s >= 40) p += 1;
-  }
-  if (bb !== '–' && bb) {
-    max += 3; const b = parseInt(bb);
-    if (b >= 75) p += 3; else if (b >= 50) p += 2; else if (b >= 30) p += 1;
-  }
-  if (rhr !== '–' && rhr) {
-    max += 2; const r = parseInt(rhr);
-    if (r <= 52) p += 2; else if (r <= 62) p += 1;
-  }
-  if (stress !== '–' && stress) {
-    max += 1; if (parseInt(stress) < 30) p += 1;
-  }
-  const score = max > 0 ? Math.round((p / max) * 10) : 0;
-  const farbe = score >= 8 ? '#00e5c8' : score >= 6 ? '#f5a623' : score >= 4 ? '#ff9040' : '#ff5c5c';
-  const label = score >= 8 ? 'Sehr gut' : score >= 6 ? 'Gut' : score >= 4 ? 'Mittel' : 'Erholung nötig';
-  return { score, farbe, label };
+function scoreColor(s) {
+  if (!s || s === '–') return '#8896b0';
+  const n = parseInt(s);
+  return n >= 80 ? '#00e5c8' : n >= 60 ? '#f5a623' : '#ff5c5c';
 }
 
 function card(icon, label, value, unit, color) {
-  const c = color || '#ffffff';
   return `<div class="card">
     <div class="card-icon">${icon}</div>
-    <div><span class="card-value" style="color:${c};">${value}</span><span class="card-unit">${unit}</span></div>
+    <div><span class="card-value" style="color:${color||'#fff'};">${value}</span><span class="card-unit">${unit}</span></div>
     <div class="card-label">${label}</div>
   </div>`;
 }
@@ -221,95 +97,90 @@ function sleepBar(name, pct, color, time) {
 }
 
 function render(d, history) {
-  const sc   = getLive(d, 'sleep.score', '–');
-  const bb   = getLive(d, 'body_bat.current', '–');
-  const rhr  = getLive(d, 'rhr.value', '–');
-  const avg7 = getLive(d, 'rhr.avg7', '–');
-  const strs = getLive(d, 'stress.avg', '–');
-  const spo2 = getLive(d, 'spo2.avg', '–');
-  const steps = getLive(d, 'steps.total', '–');
-  const stepsPct = getLive(d, 'steps.pct', '–');
-  const floors = getLive(d, 'floors.ascended', '–');
-  const floorsGoal = getLive(d, 'floors.goal', 10);
-  const kg   = getLive(d, 'weight.kg', '–');
-  const bmi  = getLive(d, 'weight.bmi', '–');
-  const fat  = getLive(d, 'weight.fat_pct', '–');
-  const muscle = getLive(d, 'weight.muscle_kg', '–');
-  const water = getLive(d, 'weight.water_pct', '–');
-  const bone  = getLive(d, 'weight.bone_mass', '–');
-  const visc  = getLive(d, 'weight.visceral', '–');
-  const sleepTotal = getLive(d, 'sleep.total', '–');
-  const deepPct  = getLive(d, 'sleep.deep_pct', 0);
-  const remPct   = getLive(d, 'sleep.rem_pct', 0);
-  const lightPct = getLive(d, 'sleep.light_pct', 0);
-  const deepTime  = getLive(d, 'sleep.deep', '–');
-  const remTime   = getLive(d, 'sleep.rem', '–');
-  const lightTime = getLive(d, 'sleep.light', '–');
-
-
+  const sc        = getLive(d,'sleep.score','–');
+  const bb        = getLive(d,'body_bat.current','–');
+  const bbCharged = getLive(d,'body_bat.charged','–');
+  const rhr       = getLive(d,'rhr.value','–');
+  const avg7      = getLive(d,'rhr.avg7','–');
+  const strs      = getLive(d,'stress.avg','–');
+  const spo2      = getLive(d,'spo2.avg','–');
+  const steps     = getLive(d,'steps.total','–');
+  const stepsPct  = getLive(d,'steps.pct','–');
+  const floors    = getLive(d,'floors.ascended','–');
+  const floorsG   = getLive(d,'floors.goal',10);
+  const kg        = getLive(d,'weight.kg','–');
+  const bmi       = getLive(d,'weight.bmi','–');
+  const fat       = getLive(d,'weight.fat_pct','–');
+  const muscle    = getLive(d,'weight.muscle_kg','–');
+  const water     = getLive(d,'weight.water_pct','–');
+  const bone      = getLive(d,'weight.bone_mass','–');
+  const visc      = getLive(d,'weight.visceral','–');
+  const sleepTotal= getLive(d,'sleep.total','–');
+  const deepPct   = getLive(d,'sleep.deep_pct',0);
+  const remPct    = getLive(d,'sleep.rem_pct',0);
+  const lightPct  = getLive(d,'sleep.light_pct',0);
+  const deepTime  = getLive(d,'sleep.deep','–');
+  const remTime   = getLive(d,'sleep.rem','–');
+  const lightTime = getLive(d,'sleep.light','–');
 
   document.getElementById('date-badge').textContent = d.date || '–';
 
-  // KI Analyse
+  // KI Schlaf
   let schlafText = '';
   try {
     const s = parseInt(sc);
-    if (s >= 85) schlafText = `Schlaf-Score <strong>${s}/100</strong> — ausgezeichnet. Mit ${sleepTotal} Schlaf, ${deepTime} Tiefschlaf und ${remTime} REM hat dein Körper optimale Regeneration bekommen.`;
-    else if (s >= 70) schlafText = `Schlaf-Score <strong>${s}/100</strong> — solide Nacht mit ${sleepTotal} Schlaf. Tiefschlaf (${deepTime}) und REM (${remTime}) im normalen Bereich.`;
-    else if (s >= 55) schlafText = `Schlaf-Score <strong>${s}/100</strong> — durchwachsene Nacht (${sleepTotal}). Tiefschlaf und REM blieben unter dem Optimum.`;
+    if (s >= 85) schlafText = `Schlaf-Score <strong>${s}/100</strong> — ausgezeichnet. ${sleepTotal} Schlaf, ${deepTime} Tiefschlaf und ${remTime} REM. Optimale Regeneration.`;
+    else if (s >= 70) schlafText = `Schlaf-Score <strong>${s}/100</strong> — solide Nacht. Tiefschlaf ${deepTime} und REM ${remTime} im normalen Bereich.`;
+    else if (s >= 55) schlafText = `Schlaf-Score <strong>${s}/100</strong> — durchwachsen. Tiefschlaf und REM unter Optimum.`;
     else schlafText = `Schlaf-Score <strong>${s}/100</strong> — schwache Nacht. Heute Erholung priorisieren.`;
   } catch(e) { schlafText = `Schlaf: ${sleepTotal} · Score: ${sc}/100`; }
 
+  // KI Erholung
   let bbText = '';
   try {
     const b = parseInt(bb);
-    const charged = getLive(d, 'body_bat.charged', '–');
-    if (b >= 75) bbText = `Body Battery <strong>${b}%</strong> — voll geladen (+${charged} aufgeladen). Perfekte Voraussetzungen für intensives Training.`;
+    if (b >= 75) bbText = `Body Battery <strong>${b}%</strong> — voll geladen. Perfekt für intensives Training.`;
     else if (b >= 50) bbText = `Body Battery <strong>${b}%</strong> — gute Reserven. Moderates Training möglich.`;
-    else if (b >= 30) bbText = `Body Battery <strong>${b}%</strong> — mittlere Reserven. Leichtes Training empfohlen.`;
-    else bbText = `Body Battery <strong>${b}%</strong> — niedrig. Heute Erholung priorisieren.`;
+    else if (b >= 30) bbText = `Body Battery <strong>${b}%</strong> — mittlere Reserven. Leichtes Training.`;
+    else bbText = `Body Battery <strong>${b}%</strong> — niedrig. Erholung priorisieren.`;
   } catch(e) { bbText = `Body Battery: ${bb}%`; }
 
   let hrText = '';
   try {
     const r = parseInt(rhr), a = parseInt(avg7), diff = r - a;
-    if (diff <= -3) hrText = `Ruhepuls <strong>${r} bpm</strong> — ${Math.abs(diff)} bpm unter deinem 7-Tage-Schnitt (${a} bpm). Ausgezeichnete Herzeffizienz.`;
-    else if (diff <= 3) hrText = `Ruhepuls <strong>${r} bpm</strong> — im normalen Bereich (Ø 7T: ${a} bpm).`;
-    else hrText = `Ruhepuls <strong>${r} bpm</strong> — ${diff} bpm über Schnitt (${a} bpm). Auf Erholung achten.`;
-  } catch(e) { hrText = `Ruhepuls: ${rhr} bpm`; }
+    if (diff <= -3) hrText = ` Ruhepuls <strong>${r} bpm</strong> — ${Math.abs(diff)} bpm unter Schnitt (${a} bpm). Ausgezeichnet.`;
+    else if (diff <= 3) hrText = ` Ruhepuls <strong>${r} bpm</strong> — normal (Ø ${a} bpm).`;
+    else hrText = ` Ruhepuls <strong>${r} bpm</strong> — ${diff} bpm über Schnitt. Auf Erholung achten.`;
+  } catch(e) { hrText = ` Ruhepuls: ${rhr} bpm`; }
 
+  // Training
   let trainText = '';
   try {
-    const s = parseInt(sc) || 60;
-    const b = parseInt(bb) || 50;
-    const comb = (s/100*0.5) + (b/100*0.5);
-    if (comb >= 0.75) trainText = '<strong>Idealer Trainingstag.</strong> Intensive Kettlebell- oder Hanteleinheit mit Progressive Overload empfohlen. Optional 20 min Laufband Zone 2.';
-    else if (comb >= 0.55) trainText = '<strong>Moderates Training.</strong> Bauchtraining oder leichte Hanteleinheit. Kein neues Maximum heute.';
-    else if (comb >= 0.35) trainText = '<strong>Leichtes Training.</strong> 20–30 min lockeres Laufband oder Dehnen.';
-    else trainText = '<strong>Ruhetag empfohlen.</strong> Spazieren, dehnen, viel Wasser trinken.';
+    const s = parseInt(sc)||60, b = parseInt(bb)||50;
+    const c = (s/100*0.5)+(b/100*0.5);
+    if (c >= 0.75) trainText = '<strong>Idealer Trainingstag.</strong> Intensive Kettlebell- oder Hanteleinheit empfohlen.';
+    else if (c >= 0.55) trainText = '<strong>Moderates Training.</strong> Bauchtraining oder leichte Hanteleinheit.';
+    else if (c >= 0.35) trainText = '<strong>Leichtes Training.</strong> Lockeres Laufband oder Dehnen.';
+    else trainText = '<strong>Ruhetag empfohlen.</strong> Spazieren, dehnen, Wasser trinken.';
   } catch(e) { trainText = 'Halte deinen Trainingsrhythmus.'; }
 
   document.getElementById('main-content').innerHTML = `
-
-    <!-- ENTWICKLUNG -->
     <div id="trend-section"></div>
 
-    <!-- SCHLAF -->
     <div class="section">
       <div class="section-head">😴 Schlaf letzte Nacht</div>
       <div class="cards" style="margin-bottom:18px;">
         ${card('🌙','Gesamt',sleepTotal,'',scoreColor(sc))}
         ${card('📊','Score',sc,'/100',scoreColor(sc))}
-        ${card('💤','Tiefschlaf',deepTime,'','#4db8ff')}
-        ${card('🧠','REM',remTime,'','#7b61ff')}
-        ${card('😪','Leicht',lightTime,'','#8896b0')}
+        ${card('💤','Tiefschlaf',deepTime,deepPct+'%','#4db8ff')}
+        ${card('🧠','REM',remTime,remPct+'%','#7b61ff')}
+        ${card('😪','Leicht',lightTime,lightPct+'%','#8896b0')}
       </div>
-      ${sleepBar('Tief', deepPct, '#4db8ff', deepTime)}
-      ${sleepBar('REM', remPct, '#7b61ff', remTime)}
-      ${sleepBar('Leicht', lightPct, '#8896b0', lightTime)}
+      ${sleepBar('Tief',deepPct,'#4db8ff',deepTime)}
+      ${sleepBar('REM',remPct,'#7b61ff',remTime)}
+      ${sleepBar('Leicht',lightPct,'#8896b0',lightTime)}
     </div>
 
-    <!-- ERHOLUNG -->
     <div class="section">
       <div class="section-head">⚡ Erholung & Vitalwerte</div>
       <div class="cards">
@@ -318,11 +189,10 @@ function render(d, history) {
         ${card('🧠','Stress Ø',strs,'','#f5a623')}
         ${card('💧','SpO₂',spo2,'%','#4db8ff')}
         ${card('🚶','Schritte',steps,'','#00e5c8')}
-        ${card('🪜','Treppen',floors,`/ ${floorsGoal}`, parseFloat(floors) >= floorsGoal ? '#00e5c8' : '#f5a623')}
+        ${card('🪜','Treppen',floors,'/ '+floorsG,parseFloat(floors)>=floorsG?'#00e5c8':'#f5a623')}
       </div>
     </div>
 
-    <!-- GEWICHT -->
     <div class="section">
       <div class="section-head">⚖️ Gewicht & Körperzusammensetzung <span style="color:#00e5c8;font-size:9px;margin-left:8px;background:rgba(0,229,200,.1);padding:2px 8px;border-radius:10px;border:1px solid rgba(0,229,200,.2);">WITHINGS → GARMIN</span></div>
       <div class="cards">
@@ -336,9 +206,23 @@ function render(d, history) {
       </div>
     </div>
 
+    <div class="section">
+      <div class="section-head">🤖 KI-Analyse</div>
+      <div class="ki-block">
+        <div class="ki-block-title" style="color:#4db8ff;">😴 Schlaf</div>
+        <div class="ki-block-text">${schlafText}</div>
+      </div>
+      <div class="ki-block">
+        <div class="ki-block-title" style="color:#00e5c8;">⚡ Erholung</div>
+        <div class="ki-block-text">${bbText}${hrText}</div>
+      </div>
+      <div class="ki-block">
+        <div class="ki-block-title" style="color:#f5a623;">🏋️ Training heute</div>
+        <div class="ki-block-text">${trainText}</div>
+      </div>
+    </div>
   `;
 
-  // History Charts
   if (history && history.length > 1) {
     renderTrend(history, currentRange);
     renderHistory(history, currentRange);
@@ -346,9 +230,6 @@ function render(d, history) {
     renderTrend([], currentRange);
   }
 }
-
-let currentRange = 7;
-let cachedHistory = [];
 
 function setRange(days, el) {
   currentRange = days;
@@ -379,134 +260,88 @@ async function loadData() {
     render(data, history);
   } catch(e) {
     document.getElementById('main-content').innerHTML =
-      '<div class="status">Keine Daten.<br><br>Script ausführen:<br><code>python3 ~/garmin_report/garmin_morning_report.py</code></div>';
+      '<div class="status">⚠️ Keine Daten verfügbar.<br><br>Script ausführen:<br><code>python3 ~/garmin_report/garmin_morning_report.py</code></div>';
     document.getElementById('date-badge').textContent = 'Keine Daten';
   }
 }
 
-
-// Entwicklungsanalyse
 function renderTrend(history, days) {
   const section = document.getElementById('trend-section');
   if (!section) return;
-  const daysWanted = days || currentRange || 7;
-  const n = Math.min(history.length, daysWanted);
-  const needed = 7;
-  const hist = history.slice(0, n);
-
+  const n = Math.min(history.length, days || currentRange || 7);
   if (n < 2) {
-    section.innerHTML = `
-      <div class="section" style="margin-bottom:16px;">
-        <div class="section-head">📈 Entwicklungsanalyse</div>
-        <div style="text-align:center;padding:24px;color:var(--muted);font-size:14px;line-height:1.8;">
-          ⏳ Noch zu wenig Daten<br>
-          <span style="font-size:12px;">Komm in <strong style="color:var(--accent);">${needed - n} Tagen</strong> wieder!</span>
-        </div>
-      </div>`;
+    section.innerHTML = `<div class="section" style="margin-bottom:16px;">
+      <div class="section-head">📈 Entwicklungsanalyse</div>
+      <div style="text-align:center;padding:24px;color:var(--muted);font-size:14px;line-height:1.8;">
+        ⏳ Noch zu wenig Daten<br>
+        <span style="font-size:12px;">Komm in <strong style="color:var(--accent);">${7-n} Tagen</strong> wieder!</span>
+      </div></div>`;
     return;
   }
-
-  function avg(arr) {
-    const v = arr.filter(x => x !== null && !isNaN(x));
-    return v.length ? v.reduce((a,b)=>a+b,0)/v.length : null;
-  }
-  function fmt(v, dec) { return v !== null && v !== undefined ? parseFloat(v).toFixed(dec||0) : '–'; }
-
-  const rev    = [...hist].reverse();
-  const last7  = rev.slice(0, Math.min(7,n));
-  const prev7  = rev.slice(Math.min(7,n), Math.min(14,n));
-
-  const sleepAvg  = avg(last7.map(h => parseInt(h.sleep?.score)||null));
-  const sleepPrev = avg(prev7.map(h => parseInt(h.sleep?.score)||null));
-  const sleepDiff = sleepAvg !== null && sleepPrev !== null ? sleepAvg - sleepPrev : null;
-
-  const rhrAvg  = avg(last7.map(h => parseInt(h.rhr?.value)||null));
-  const rhrPrev = avg(prev7.map(h => parseInt(h.rhr?.value)||null));
-  const rhrDiff = rhrAvg !== null && rhrPrev !== null ? rhrAvg - rhrPrev : null;
-
-  const bbAvg  = avg(last7.map(h => parseInt(h.body_bat?.current)||null));
-
-  const wtVals  = last7.map(h => parseFloat(h.weight?.kg)||null).filter(v=>v);
-  const wtFirst = wtVals[0] || null;
-  const wtLast  = wtVals[wtVals.length-1] || null;
-  const wtDiff  = wtFirst && wtLast ? wtLast - wtFirst : null;
-
-  const fatVals  = last7.map(h => parseFloat(h.weight?.fat_pct)||null).filter(v=>v);
-  const fatLast  = fatVals[fatVals.length-1] || null;
-  const fatFirst = fatVals[0] || null;
-  const fatDiff  = fatFirst && fatLast ? fatLast - fatFirst : null;
-
-  function row(icon, title, value, unit, diff, lowerBetter) {
-    let arrow = '→', color = '#f5a623', comment = 'Stabil';
-    if (diff !== null) {
-      const good = lowerBetter ? diff < -0.3 : diff > 0.3;
-      const bad  = lowerBetter ? diff > 0.3  : diff < -0.3;
-      arrow   = diff > 0.3 ? '↑' : diff < -0.3 ? '↓' : '→';
-      color   = good ? '#00e5c8' : bad ? '#ff5c5c' : '#f5a623';
-      const d = Math.abs(diff).toFixed(1);
-      comment = good ? (lowerBetter ? `${d}${unit} gesunken — sehr gut!` : `+${d}${unit} verbessert — sehr gut!`)
-              : bad  ? (lowerBetter ? `${d}${unit} gestiegen — Achtung`  : `${d}${unit} gesunken — Achtung`)
-              : 'Stabil';
+  function avg(arr) { const v=arr.filter(x=>x!==null&&!isNaN(x)); return v.length?v.reduce((a,b)=>a+b,0)/v.length:null; }
+  function fmt(v,d) { return v!==null&&v!==undefined?parseFloat(v).toFixed(d||0):'–'; }
+  const rev   = [...history].slice(0,n).reverse();
+  const last7 = rev.slice(0,Math.min(7,n));
+  const prev7 = rev.slice(Math.min(7,n),Math.min(14,n));
+  const sleepAvg=avg(last7.map(h=>parseInt(h.sleep?.score)||null));
+  const sleepDiff=sleepAvg!==null&&avg(prev7.map(h=>parseInt(h.sleep?.score)||null))!==null?sleepAvg-avg(prev7.map(h=>parseInt(h.sleep?.score)||null)):null;
+  const rhrAvg=avg(last7.map(h=>parseInt(h.rhr?.value)||null));
+  const rhrDiff=rhrAvg!==null&&avg(prev7.map(h=>parseInt(h.rhr?.value)||null))!==null?rhrAvg-avg(prev7.map(h=>parseInt(h.rhr?.value)||null)):null;
+  const bbAvg=avg(last7.map(h=>parseInt(h.body_bat?.current)||null));
+  const wtV=last7.map(h=>parseFloat(h.weight?.kg)||null).filter(v=>v);
+  const wtDiff=wtV.length>1?wtV[wtV.length-1]-wtV[0]:null;
+  const fatV=last7.map(h=>parseFloat(h.weight?.fat_pct)||null).filter(v=>v);
+  const fatDiff=fatV.length>1?fatV[fatV.length-1]-fatV[0]:null;
+  function row(icon,title,value,unit,diff,lower) {
+    let arrow='→',color='#f5a623',comment='Stabil';
+    if(diff!==null){
+      const good=lower?diff<-0.3:diff>0.3,bad=lower?diff>0.3:diff<-0.3;
+      arrow=diff>0.3?'↑':diff<-0.3?'↓':'→';
+      color=good?'#00e5c8':bad?'#ff5c5c':'#f5a623';
+      const d=Math.abs(diff).toFixed(1);
+      comment=good?(lower?`${d}${unit} gesunken — sehr gut!`:`+${d}${unit} verbessert!`):bad?(lower?`${d}${unit} gestiegen — Achtung`:`${d}${unit} gesunken — Achtung`):'Stabil';
     }
-    return `<div class="ki-block">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-        <span style="font-size:15px;">${icon}</span>
-        <span class="ki-block-title" style="color:${color};">${title}</span>
-        <span style="font-size:15px;color:${color};font-weight:700;">${arrow}</span>
-      </div>
+    return `<div class="ki-block"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+      <span>${icon}</span><span class="ki-block-title" style="color:${color};">${title}</span>
+      <span style="color:${color};font-weight:700;">${arrow}</span></div>
       <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:3px;">
         <span style="font-family:'Bebas Neue',sans-serif;font-size:26px;color:${color};">${value}</span>
-        <span style="font-size:11px;color:var(--muted);">${unit}</span>
-      </div>
-      <div class="ki-block-text">${comment}</div>
-    </div>`;
+        <span style="font-size:11px;color:var(--muted);">${unit}</span></div>
+      <div class="ki-block-text">${comment}</div></div>`;
   }
-
-  const daysNote = n < needed
-    ? `<div style="font-size:11px;color:var(--accent3);margin-bottom:12px;">📊 ${n} von ${needed} Tagen — wird präziser mit mehr Daten</div>`
-    : '';
-
-  section.innerHTML = `
-    <div class="section" style="margin-bottom:16px;">
-      <div class="section-head">📈 Entwicklungsanalyse (letzte ${Math.min(n, daysWanted)} Tage)</div>
-      ${daysNote}
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
-        ${row('😴','Schlaf-Score', fmt(sleepAvg), 'Pkt Ø', sleepDiff, false)}
-        ${row('❤️','Ruhepuls', fmt(rhrAvg), 'bpm Ø', rhrDiff, true)}
-        ${row('🔋','Body Battery', fmt(bbAvg), '% Ø', null, false)}
-        ${row('⚖️','Gewicht', fmt(wtLast,1), 'kg', wtDiff, true)}
-        ${row('🔥','Körperfett', fmt(fatLast,1), '%', fatDiff, true)}
-      </div>
-    </div>`;
+  section.innerHTML = `<div class="section" style="margin-bottom:16px;">
+    <div class="section-head">📈 Entwicklungsanalyse (letzte ${n} Tage)</div>
+    ${n<7?`<div style="font-size:11px;color:var(--accent3);margin-bottom:12px;">📊 ${n} von 7 Tagen — wird präziser mit mehr Daten</div>`:''}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+      ${row('😴','Schlaf-Score',fmt(sleepAvg),'Pkt Ø',sleepDiff,false)}
+      ${row('❤️','Ruhepuls',fmt(rhrAvg),'bpm Ø',rhrDiff,true)}
+      ${row('🔋','Body Battery',fmt(bbAvg),'% Ø',null,false)}
+      ${row('⚖️','Gewicht',fmt(wtV[wtV.length-1],1),'kg',wtDiff,true)}
+      ${row('🔥','Körperfett',fmt(fatV[fatV.length-1],1),'%',fatDiff,true)}
+    </div></div>`;
 }
 
-// 30-Tage History Charts
-function sparkline(id, vals, color, lbl) {
+function sparkline(id, vals, color) {
   const el = document.getElementById(id);
   if (!el) return;
   if (!window._ch) window._ch = {};
   if (window._ch[id]) window._ch[id].destroy();
   window._ch[id] = new Chart(el, {
     type: 'line',
-    data: { labels: vals.map((_,i) => i), datasets: [{ data: vals, borderColor: color, backgroundColor: color.replace('rgb(','rgba(').replace(')',',0.08)'), tension: .4, fill: true, pointRadius: 2, borderWidth: 2 }] },
-    options: {
-      animation: { duration: 500 },
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { display: false },
-        y: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { color: '#8896b0', font: { size: 10 } } }
-      },
-      responsive: true, maintainAspectRatio: false,
-    }
+    data: { labels: vals.map((_,i)=>i), datasets: [{ data: vals, borderColor: color, backgroundColor: color.replace('rgb(','rgba(').replace(')',',0.08)'), tension:.4, fill:true, pointRadius:2, borderWidth:2 }] },
+    options: { animation:{duration:500}, plugins:{legend:{display:false}}, scales:{ x:{display:false}, y:{grid:{color:'rgba(255,255,255,.04)'}, ticks:{color:'#8896b0',font:{size:10}}} }, responsive:true, maintainAspectRatio:false }
   });
 }
 
 function renderHistory(history, days) {
+  const daysH = days || currentRange || 7;
+  const existing = document.getElementById('history-section');
+  if (existing) existing.remove();
   const s = document.createElement('div');
+  s.id = 'history-section';
   s.className = 'section';
   s.style.marginBottom = '16px';
-  s.innerHTML = `
-    <div class="section-head">📈 Verlauf (${Math.min(history.length, daysH)} Tage)</div>
+  s.innerHTML = `<div class="section-head">📊 Verlauf (${Math.min(history.length,daysH)} Tage)</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
       <div><div style="font-size:11px;color:var(--muted);margin-bottom:6px;">😴 Schlaf-Score</div><div style="height:90px;"><canvas id="h-sleep"></canvas></div></div>
       <div><div style="font-size:11px;color:var(--muted);margin-bottom:6px;">❤️ Ruhepuls (bpm)</div><div style="height:90px;"><canvas id="h-rhr"></canvas></div></div>
@@ -514,13 +349,12 @@ function renderHistory(history, days) {
       <div><div style="font-size:11px;color:var(--muted);margin-bottom:6px;">⚖️ Gewicht (kg)</div><div style="height:90px;"><canvas id="h-weight"></canvas></div></div>
     </div>`;
   document.getElementById('main-content').appendChild(s);
-  const daysH = days || currentRange || 7;
-  const rev = [...history].slice(0, daysH).reverse();
+  const rev = [...history].slice(0,daysH).reverse();
   setTimeout(() => {
-    sparkline('h-sleep',  rev.map(h => parseInt(h.sleep?.score)||null).filter(v=>v!==null),     'rgb(123,97,255)', 'Score');
-    sparkline('h-rhr',    rev.map(h => parseInt(h.rhr?.value)||null).filter(v=>v!==null),        'rgb(255,92,92)',  'bpm');
-    sparkline('h-bb',     rev.map(h => parseInt(h.body_bat?.current)||null).filter(v=>v!==null), 'rgb(0,229,200)', '%');
-    sparkline('h-weight', rev.map(h => parseFloat(h.weight?.kg)||null).filter(v=>v!==null),      'rgb(245,166,35)','kg');
+    sparkline('h-sleep',  rev.map(h=>parseInt(h.sleep?.score)||null).filter(v=>v!==null),        'rgb(123,97,255)');
+    sparkline('h-rhr',    rev.map(h=>parseInt(h.rhr?.value)||null).filter(v=>v!==null),           'rgb(255,92,92)');
+    sparkline('h-bb',     rev.map(h=>parseInt(h.body_bat?.current)||null).filter(v=>v!==null),    'rgb(0,229,200)');
+    sparkline('h-weight', rev.map(h=>parseFloat(h.weight?.kg)||null).filter(v=>v!==null),         'rgb(245,166,35)');
   }, 200);
 }
 
