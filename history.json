@@ -248,5 +248,55 @@
     "spo2": {
       "avg": 97.0
     }
+  },
+  {
+    "date": "Donnerstag, 11. Juni 2026",
+    "sleep": {
+      "total": "7h 40m",
+      "deep": "2h 03m",
+      "rem": "1h 44m",
+      "light": "3h 53m",
+      "awake": "0h 03m",
+      "score": 90,
+      "deep_pct": 27,
+      "rem_pct": 23,
+      "light_pct": 51
+    },
+    "body_bat": {
+      "charged": 55,
+      "drained": 10,
+      "current": 55
+    },
+    "rhr": {
+      "value": 50,
+      "avg7": 50
+    },
+    "stress": {
+      "avg": 17,
+      "rest": "–"
+    },
+    "weight": {
+      "kg": 74.3,
+      "bmi": 24.3,
+      "fat_pct": 18.8,
+      "muscle_kg": 57.3,
+      "muscle_pct": 77.1,
+      "bone_mass": 3.01,
+      "water_pct": 54.5,
+      "visceral": 3
+    },
+    "steps": {
+      "total": "11.264",
+      "goal": 10000,
+      "pct": 113
+    },
+    "floors": {
+      "ascended": 1.2,
+      "goal": 10,
+      "meters": 3.6
+    },
+    "spo2": {
+      "avg": 98.0
+    }
   }
 ]
