@@ -1,43 +1,43 @@
 {
-  "date": "Freitag, 12. Juni 2026",
+  "date": "Samstag, 13. Juni 2026",
   "sleep": {
-    "total": "6h 07m",
-    "deep": "1h 48m",
-    "rem": "0h 56m",
-    "light": "3h 23m",
-    "awake": "0h 13m",
+    "total": "6h 13m",
+    "deep": "2h 07m",
+    "rem": "0h 53m",
+    "light": "3h 13m",
+    "awake": "0h 00m",
     "score": 74,
-    "deep_pct": 29,
-    "rem_pct": 15,
-    "light_pct": 55
+    "deep_pct": 34,
+    "rem_pct": 14,
+    "light_pct": 52
   },
   "body_bat": {
-    "charged": 48,
-    "drained": 8,
-    "current": 48
+    "charged": 31,
+    "drained": 3,
+    "current": 31
   },
   "rhr": {
-    "value": 50,
-    "avg7": 50
+    "value": 47,
+    "avg7": 47
   },
   "stress": {
-    "avg": 16,
+    "avg": 20,
     "rest": "–"
   },
   "weight": {
-    "kg": 74.6,
-    "bmi": 24.4,
-    "fat_pct": 18.7,
-    "muscle_kg": 57.6,
-    "muscle_pct": 77.2,
-    "bone_mass": 3.03,
-    "water_pct": 54.8,
+    "kg": 73.9,
+    "bmi": 24.1,
+    "fat_pct": 18.4,
+    "muscle_kg": 57.3,
+    "muscle_pct": 77.5,
+    "bone_mass": 3.01,
+    "water_pct": 54.7,
     "visceral": 3
   },
   "steps": {
-    "total": "10.061",
+    "total": "5.798",
     "goal": 10000,
-    "pct": 101
+    "pct": 58
   },
   "floors": {
     "ascended": 0.0,
